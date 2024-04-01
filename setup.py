@@ -11,7 +11,15 @@ from setuptools import setup
 
 if __name__ == "__main__":
     try:
-        setup(use_scm_version={"version_scheme": "no-guess-dev"})
+        setup(
+            version="0.2.4",
+            entry_points={
+                "console_scripts": [
+                    "run = smadi.workflow:main",
+                ]
+            },
+        )
+
     except:  # noqa
         print(
             "\n\nAn error occurred while building the project, "
