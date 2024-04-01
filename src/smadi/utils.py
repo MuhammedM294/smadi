@@ -6,6 +6,8 @@ from io import StringIO
 import pycountry
 import pandas as pd
 
+from fibgrid.realization import FibLandGrid
+
 
 def create_logger(name, level=logging.DEBUG):
     """
@@ -130,7 +132,7 @@ def get_country_code(country_name):
         return None
 
 
-def load_gpis_by_country(country, grid="fibgrid_n6600000", format="csv"):
+def load_gpis_by_country(country, res=6.25, format="csv"):
     """
     Load the GPIS based on the country name from the DGG API
     Source: https://dgg.geo.tuwien.ac.at/
@@ -155,8 +157,15 @@ def load_gpis_by_country(country, grid="fibgrid_n6600000", format="csv"):
 
     country = get_country_code(country)
 
+    if res == 6.25:
+        grid = "fibgrid_n6600000"
+    elif res == 12.5:
+        grid = "fibgrid_n1650000"
+    elif res == 25:
+        grid = "fibgrid_n430000"
+
     # Construct the URL based on the provided country name, grid, and format
-    url = f"https://dgg.geo.tuwien.ac.at/get_points/?grid={grid}&country={country.upper()}&format=csv"
+    url = f"https://dgg.geo.tuwien.ac.at/get_points/?grid={grid}&country={country.upper()}&format={format}"
 
     try:
         response = requests.get(url)
@@ -171,3 +180,14 @@ def load_gpis_by_country(country, grid="fibgrid_n6600000", format="csv"):
     except Exception as e:
         print(f"An error occurred: {str(e)}")
         return None
+
+
+def get_gpis_from_bbox(bbox, res=6.25):
+
+    lonmin, lonmax, latmin, latmax = bbox
+    grid = FibLandGrid(res)
+    gpis = grid.get_bbox_grid_points(
+        lonmin=lonmin, lonmax=lonmax, latmin=latmin, latmax=latmax, both=True
+    )
+
+    return pd.DataFrame({"point": gpis[0], "lon": gpis[1], "lat": gpis[2]})

@@ -16,7 +16,13 @@ import numpy as np
 
 from smadi.metadata import _Detectors
 from smadi.data_reader import AscatData
-from smadi.utils import create_logger, log_exception, log_time, load_gpis_by_country
+from smadi.utils import (
+    create_logger,
+    log_exception,
+    log_time,
+    load_gpis_by_country,
+    get_gpis_from_bbox,
+)
 
 
 def setup_argument_parser() -> ArgumentParser:
@@ -31,12 +37,19 @@ def setup_argument_parser() -> ArgumentParser:
     parser.add_argument(
         "data_path", metavar="data_path", type=str, help="Path to the ASCAT data"
     )
-    parser.add_argument("country", metavar="country", type=str, help="Country name")
+    parser.add_argument(
+        "aoi",
+        metavar="aoi",
+        type=str,
+        help="Country name or bounding box coordinates\
+        in the tuple 'lon_min, lon_max , lat_min, lat_max'",
+    )
     parser.add_argument(
         "time_step",
         metavar="time_step",
         type=str,
         default="month",
+        choices=["month", "dekad", "week", "bimonth", "day"],
         help="The time step for the climatology calculation. Supported values: month, dekad, week, bimonth, day",
     )
 
@@ -55,6 +68,7 @@ def setup_argument_parser() -> ArgumentParser:
         nargs="*",
         default=None,
         required=True,
+        choices=range(2007, 2023),
         help="The year(s) for the date parameters",
     )
     parser.add_argument(
@@ -63,6 +77,7 @@ def setup_argument_parser() -> ArgumentParser:
         type=int,
         nargs="*",
         default=None,
+        choices=range(1, 13),
         help="The month(s) for the date parameters",
     )
     parser.add_argument(
@@ -71,6 +86,7 @@ def setup_argument_parser() -> ArgumentParser:
         type=int,
         nargs="*",
         default=None,
+        choices=(1, 2, 3),
         help="The dekad(s) for the date parameters",
     )
     parser.add_argument(
@@ -79,6 +95,7 @@ def setup_argument_parser() -> ArgumentParser:
         type=int,
         nargs="*",
         default=None,
+        choices=range(1, 53),
         help="The week(s) for the date parameters",
     )
     parser.add_argument(
@@ -87,6 +104,7 @@ def setup_argument_parser() -> ArgumentParser:
         type=int,
         nargs="*",
         default=None,
+        choices=(1, 2),
         help="The bimonth(s) for the date parameters",
     )
     parser.add_argument(
@@ -95,6 +113,7 @@ def setup_argument_parser() -> ArgumentParser:
         type=int,
         nargs="*",
         default=None,
+        choices=range(1, 32),
         help="The day(s) for the date parameters",
     )
     parser.add_argument(
@@ -143,7 +162,9 @@ args: Namespace = parser.parse_args()
 
 # Required parameters
 data_path = args.data_path
-country = args.country
+aoi = args.aoi
+if "," in aoi:
+    aoi = tuple(map(float, aoi.split(",")))
 variable = args.variable
 time_step = args.time_step
 
@@ -374,7 +395,7 @@ def _finalize(result: Tuple[int, dict], df: pd.DataFrame, gpis_col="point"):
 
 @log_time(logger)
 def run(
-    country: str,
+    aoi: Union[str, Tuple[float, float, float, float]],
     methods: Union[str, List[str]] = ["zscore"],
     variable: str = "sm",
     time_step: str = "month",
@@ -396,9 +417,14 @@ def run(
     """
     # Print workflow start message
     print("\nWorkflow started....\n")
-    print(f"Loading grid points for {country}....")
-    pointlist = load_gpis_by_country(country)
-    print(f"Grid points loaded successfully for {country}\n")
+    print(f"Loading grid points for {aoi}....")
+
+    if isinstance(aoi, str):
+        pointlist = load_gpis_by_country(aoi)
+    else:
+        pointlist = get_gpis_from_bbox(aoi)
+
+    print(f"Grid points loaded successfully for {aoi}\n")
     print(pointlist.head())
     print("\n")
     pointlist = pointlist[:100]
@@ -421,14 +447,14 @@ def run(
     )
 
     # Print the workflow initiation message
-    print(f"Running the anomaly detection workflow for {country}....\n")
+    print(f"Running the anomaly detection workflow for {aoi}....\n")
 
     # Print workflow parameters
-    print("Workflow parameters:")
-    print(f"Anomaly detection methods: {', '.join(methods)}")
-    print(f"Variable: {variable}")
-    print(f"Time step for Climatology: {time_step}")
-    print("Date parameters:")
+    print("Workflow parameters:\n")
+    print(f"    Anomaly detection methods: {', '.join(methods)}")
+    print(f"    Variable: {variable}")
+    print(f"    Time step for Climatology: {time_step}")
+    print(f"    Date parameters:\n")
 
     # Print date parameters if available
     date_parameters = {
@@ -441,7 +467,7 @@ def run(
     }
     for param, value in date_parameters.items():
         if value:
-            print(f"{param}: {value}")
+            print(f"     {param}: {value}")
 
     with ProcessPoolExecutor(workers) as executor:
         results = executor.map(pre_compute, pointlist["point"])
@@ -463,7 +489,7 @@ def main():
 
     start = time()
     df = run(
-        country=country,
+        aoi=aoi,
         methods=methods,
         variable=variable,
         time_step=time_step,
@@ -481,7 +507,7 @@ def main():
         workers=workers,
     )
 
-    print(f"Workflow completed in {time() - start} seconds\n")
+    print(f"\nWorkflow completed in {time() - start} seconds\n")
     print(df)
 
     if save_to:
