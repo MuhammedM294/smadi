@@ -1,11 +1,12 @@
 """
-run_workflow.py - SSMAD Workflow Execution
+run_workflow.py - SMADI Workflow Execution
 
 """
 
 __author__ = "Muhammed Abdelaal"
 __email__ = "muhammedaabdelaal@gmail.com"
 
+from argparse import ArgumentParser, Namespace, ArgumentError
 from typing import List, Tuple, Union, Dict
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
@@ -14,51 +15,165 @@ import numpy as np
 
 
 from smadi.metadata import _Detectors
+from smadi.data_reader import AscatData
 from smadi.utils import create_logger, log_exception, log_time, load_gpis_by_country
 
 
+def setup_argument_parser() -> ArgumentParser:
+    """
+    Setup argument parser for SMADI workflow execution.
+    """
+    parser = ArgumentParser(
+        description="Run the SMADI workflow for anomaly detection in ASCAT data"
+    )
+
+    # Required arguments
+    parser.add_argument(
+        "data_path", metavar="data_path", type=str, help="Path to the ASCAT data"
+    )
+    parser.add_argument("country", metavar="country", type=str, help="Country name")
+    parser.add_argument(
+        "time_step",
+        metavar="time_step",
+        type=str,
+        default="month",
+        help="The time step for the climatology calculation. Supported values: month, dekad, week, bimonth, day",
+    )
+
+    # Optional arguments
+    parser.add_argument(
+        "--variable",
+        metavar="variable",
+        type=str,
+        default="sm",
+        help="The variable to be used for the anomaly detection.",
+    )
+    parser.add_argument(
+        "--year",
+        metavar="year",
+        type=int,
+        nargs="*",
+        default=None,
+        required=True,
+        help="The year(s) for the date parameters",
+    )
+    parser.add_argument(
+        "--month",
+        metavar="month",
+        type=int,
+        nargs="*",
+        default=None,
+        help="The month(s) for the date parameters",
+    )
+    parser.add_argument(
+        "--dekad",
+        metavar="dekad",
+        type=int,
+        nargs="*",
+        default=None,
+        help="The dekad(s) for the date parameters",
+    )
+    parser.add_argument(
+        "--week",
+        metavar="week",
+        type=int,
+        nargs="*",
+        default=None,
+        help="The week(s) for the date parameters",
+    )
+    parser.add_argument(
+        "--bimonth",
+        metavar="bimonth",
+        type=int,
+        nargs="*",
+        default=None,
+        help="The bimonth(s) for the date parameters",
+    )
+    parser.add_argument(
+        "--day",
+        metavar="day",
+        type=int,
+        nargs="*",
+        default=None,
+        help="The day(s) for the date parameters",
+    )
+    parser.add_argument(
+        "--methods",
+        metavar="methods",
+        type=str,
+        nargs="*",
+        default=["zscore"],
+        help="Anomaly detection methods. Supported methods: zscore, smapi-mean,\
+            smapi-median, smdi, smca-mean, smca-median, smad, smci, smds, essmi, beta, gamma",
+    )
+    parser.add_argument(
+        "--timespan",
+        metavar="timespan",
+        type=list,
+        default=None,
+        help="To work on a subset of the data. Example: ['2012-01-01', '2012-12-31']",
+    )
+    parser.add_argument(
+        "--fillna", type=bool, default=False, help="Fill missing values"
+    )
+    parser.add_argument("--fillna_size", type=int, default=3, help="Fillna window size")
+    parser.add_argument("--smoothing", type=bool, default=False, help="Apply smoothing")
+    parser.add_argument(
+        "--smooth_size", type=int, default=31, help="Smoothing window size"
+    )
+    parser.add_argument(
+        "--workers",
+        metavar="workers",
+        type=int,
+        default=None,
+        help="The number of workers to use for multiprocessing",
+    )
+    parser.add_argument(
+        "--save_to",
+        type=str,
+        default=None,
+        help="Save the output to a file to the given path",
+    )
+
+    return parser
+
+
+parser = setup_argument_parser()
+args: Namespace = parser.parse_args()
+
+# Required parameters
+data_path = args.data_path
+country = args.country
+variable = args.variable
+time_step = args.time_step
+
+# Optional parameters
+methods = args.methods
+workers = args.workers
+fillna = args.fillna
+fillna_window_size = args.fillna_size
+smoothing = args.smoothing
+smooth_window_size = args.smooth_size
+timespan = args.timespan
+year = args.year
+month = args.month
+dekad = args.dekad
+week = args.week
+bimonth = args.bimonth
+day = args.day
+save_to = args.save_to
+
+# Create an instance of the AscatData class
+ascat_obj = AscatData(data_path, False)
+
+# Create a logger
 logger = create_logger("run_logger")
 
 
-def load_gpis(file):
-    """
-    Load GPIS from a csv file
-
-    paramters:
-    ---------
-    file: str
-        path to the csv file
-
-    returns:
-    --------
-    pd.DataFrame
-        a dataframe containing the GPIS
-    """
-    pointlist = pd.read_csv(file)
-    return pointlist
-
-
 @log_exception(logger)
-def load_ts(gpi, ascat_obj, variable="sm"):
+def load_ts(gpi, variable="sm"):
     """
     Load ASCAT time series for a given gpi
-
-    parameters:
-    -----------
-    gpi: int
-        the grid point index
-
-    ascat_obj: AscatData
-        the ascat object
-
-    variable: str
-        the variable to load
-
-    returns:
-    --------
-    pd.DataFrame
-        a dataframe containing the time series for the given gpi
-
     """
     ascat_ts = ascat_obj.read(gpi)
     valid = ascat_ts["num_sigma"] >= 2
@@ -159,8 +274,21 @@ def validate_date_params(
     return date_param
 
 
+def validate_anomaly_method(methods):
+    """
+    Validate the anomaly detection method
+    """
+
+    for method in methods:
+        if method not in _Detectors.keys():
+            raise ValueError(
+                f"Anomaly method '{method}' is not supported."
+                f"Supported methods are one of the following: {tuple(_Detectors.keys())}"
+            )
+
+
 @log_exception(logger)
-def anomaly_worlflow(
+def single_po_run(
     gpi: int,
     methods: str = ["zscore"],
     variable: str = "sm",
@@ -178,88 +306,12 @@ def anomaly_worlflow(
     timespan: List[str] = None,
 ) -> Tuple[int, Dict[str, float]]:
     """
-    The anomaly detection workflow for a given grid point index (GPI).
-
-    parameters:
-    -----------
-
-    gpi: int
-        The grid point index
-
-    methods: str or list of str
-        The anomaly detection methods to be used. Supported methods are: 'zscore', 'smapi-mean', 'smapi-median',
-        'smdi', 'smca-mean', 'smca-median', 'smad', 'smci', 'smds', 'essmi', 'beta', 'gamma'
-
-    variable: str
-        The variable to be used for the anomaly detection. Supported values: 'sm'
-
-    time_step: str
-        The time step of the date parameters. Supported values: 'month', 'dekad', 'week', 'bimonth', 'day'
-
-    fillna: bool
-        Whether to fill missing values in the time series
-
-    fillna_window_size: int
-        The window size for the fillna method
-
-    smoothing: bool
-        Whether to apply smoothing to the time series
-
-    smooth_window_size: int
-        The window size for the smoothing method
-
-    year: int or list of ints
-        The year(s) for the date parameters
-
-    month: int or list of ints
-        The month(s) for the date parameters
-
-    dekad: int or list of ints
-        The dekad(s) for the date parameters
-
-    week: int or list of ints
-        The week(s) for the date parameters
-
-    bimonth: int or list of ints
-        The bimonth(s) for the date parameters
-
-    day: int or list of ints
-        The day(s) for the date parameters
-
-    timespan: list of str
-        The start and end dates for a timespan to be aggregated. Format: ['YYYY-MM-DD ]
-        example: ['2012-01-01', '2012-12-31']
-
-    returns:
-    --------
-    Tuple[int, Dict[str, float]]
-        The grid point index and the results of the anomaly detection methods
-
-
-    Example:
-    --------
-    Single anomaly detection method with a single date parameter:
-
-        Compute the anomaly using the 'zscore' method based on monthly climate normal
-        for the grid point index 4841504 for the month of December 2012:
-
-            anomaly_worlflow(4841504, methods=['zscore'], variable='sm', time_step='month', year=2012, month=12)
-
-
-
-    Multiple anomaly detection methods with multiple date parameters:
-
-       Compute the anomalies using the 'beta' and 'gamma' methods based on weekly climate normals
-       for the grid point index 4841504 for the months of December 2012 and November 2011:
-
-           anomaly_worlflow(4841504, methods=['beta','gamma'], variable='sm', time_step='week', year=[2012,2011], month=[12,11])
+    Run the anomaly detection workflow for a single grid point index.
     """
 
-    # Use the global ascat object
-    global ascat_obj
     # Load the time series for the given gpi
-    # df = extract_obs_ts(gpi, ascat_path, obs_type="sm" , read_bulk=False)
-    df = load_ts(gpi, ascat_obj)
+    global ascat_obj
+    df = load_ts(gpi, variable=variable)
     # Validate the date parameters
     date_params = validate_date_params(
         time_step, year, month, dekad, week, bimonth, day
@@ -272,42 +324,36 @@ def anomaly_worlflow(
     # Define a dictionary to store the results
     results = {}
     for method in methods:
-        if method not in _Detectors.keys():
-            raise ValueError(
-                f"Anomaly method '{method}' is not supported."
-                f"Supported methods are one of the following: {tuple(_Detectors.keys())}"
-            )
-        else:
 
-            # Define the anomaly detection parameters
-            anomaly_params = {
-                "df": df,
-                "variable": variable,
-                "time_step": time_step,
-                "fillna": fillna,
-                "fillna_window_size": fillna_window_size,
-                "smoothing": smoothing,
-                "smooth_window_size": smooth_window_size,
-                "timespan": timespan,
-            }
+        # Define the anomaly detection parameters
+        anomaly_params = {
+            "df": df,
+            "variable": variable,
+            "time_step": time_step,
+            "fillna": fillna,
+            "fillna_window_size": fillna_window_size,
+            "smoothing": smoothing,
+            "smooth_window_size": smooth_window_size,
+            "timespan": timespan,
+        }
 
-            # If the method has a metric parameter (e.g. smapi-mean, smapi-median), set the metric parameter
-            if "-" in method:
-                anomaly_params["normal_metrics"] = [method.split("-")[1]]
+        # If the method has a metric parameter (e.g. smapi-mean, smapi-median), set the metric parameter
+        if "-" in method:
+            anomaly_params["normal_metrics"] = [method.split("-")[1]]
 
-            elif method in ["beta", "gamma"]:
-                anomaly_params["dist"] = [method]
+        elif method in ["beta", "gamma"]:
+            anomaly_params["dist"] = [method]
 
-            try:
-                for date_param in date_params:
-                    anomaly = _Detectors[method](**anomaly_params).detect_anomaly(
-                        **date_param
-                    )
-                    date_str = f"-".join(str(value) for value in date_param.values())
-                    results[method + f"({date_str})"] = anomaly[method].values[0]
+        try:
+            for date_param in date_params:
+                anomaly = _Detectors[method](**anomaly_params).detect_anomaly(
+                    **date_param
+                )
+                date_str = f"-".join(str(value) for value in date_param.values())
+                results[method + f"({date_str})"] = anomaly[method].values[0]
 
-            except AttributeError as e:
-                return None
+        except AttributeError as e:
+            return None
 
     return (gpi, results)
 
@@ -328,7 +374,7 @@ def _finalize(result: Tuple[int, dict], df: pd.DataFrame, gpis_col="point"):
 
 @log_time(logger)
 def run(
-    country: str = None,
+    country: str,
     methods: Union[str, List[str]] = ["zscore"],
     variable: str = "sm",
     time_step: str = "month",
@@ -348,11 +394,16 @@ def run(
     """
     Run the anomaly detection workflow for multiple grid point indices with multiprocessing support.
     """
-
+    # Print workflow start message
+    print("\nWorkflow started....\n")
+    print(f"Loading grid points for {country}....")
     pointlist = load_gpis_by_country(country)
-    # pointlist = pointlist[1000:1500]
+    print(f"Grid points loaded successfully for {country}\n")
+    print(pointlist.head())
+    print("\n")
+    pointlist = pointlist[:100]
     pre_compute = partial(
-        anomaly_worlflow,
+        single_po_run,
         methods=methods,
         variable=variable,
         time_step=time_step,
@@ -369,9 +420,79 @@ def run(
         timespan=timespan,
     )
 
+    # Print the workflow initiation message
+    print(f"Running the anomaly detection workflow for {country}....\n")
+
+    # Print workflow parameters
+    print("Workflow parameters:")
+    print(f"Anomaly detection methods: {', '.join(methods)}")
+    print(f"Variable: {variable}")
+    print(f"Time step for Climatology: {time_step}")
+    print("Date parameters:")
+
+    # Print date parameters if available
+    date_parameters = {
+        "Year": year,
+        "Month": month,
+        "Dekad": dekad,
+        "Week": week,
+        "Bimonth": bimonth,
+        "Day": day,
+    }
+    for param, value in date_parameters.items():
+        if value:
+            print(f"{param}: {value}")
+
     with ProcessPoolExecutor(workers) as executor:
         results = executor.map(pre_compute, pointlist["point"])
         for result in results:
             pointlist = _finalize(result, pointlist)
 
         return pointlist
+
+
+def main():
+
+    try:
+        validate_anomaly_method(methods)
+        validate_date_params(time_step, year, month, dekad, week, bimonth, day)
+    except ArgumentError as e:
+        parser.error(str(e))
+
+    from time import time
+
+    start = time()
+    df = run(
+        country=country,
+        methods=methods,
+        variable=variable,
+        time_step=time_step,
+        year=year,
+        month=month,
+        week=week,
+        day=day,
+        bimonth=bimonth,
+        dekad=dekad,
+        timespan=timespan,
+        fillna=fillna,
+        fillna_window_size=fillna_window_size,
+        smoothing=smoothing,
+        smooth_window_size=smooth_window_size,
+        workers=workers,
+    )
+
+    print(f"Workflow completed in {time() - start} seconds\n")
+    print(df)
+
+    if save_to:
+        try:
+            df.to_csv(save_to)
+            print(f"Saving the output data frame to {save_to}....")
+            print("Output saved successfully")
+
+        except ArgumentError as e:
+            parser.error(str(e))
+
+
+if __name__ == "__main__":
+    main()
