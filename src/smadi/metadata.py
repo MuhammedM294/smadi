@@ -8,10 +8,13 @@ from smadi.anomaly_detectors import (
     SMDS,
     ESSMI,
     ParaDis,
+    AbsoluteAnomaly,
 )
 
 # Supported anomaly detection methods
 _Detectors = {
+    "abs-mean": AbsoluteAnomaly,
+    "abs-median": AbsoluteAnomaly,
     "zscore": ZScore,
     "smapi-mean": SMAPI,
     "smapi-median": SMAPI,

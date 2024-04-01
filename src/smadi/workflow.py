@@ -123,7 +123,8 @@ def setup_argument_parser() -> ArgumentParser:
         nargs="*",
         default=["zscore"],
         help="Anomaly detection methods. Supported methods: zscore, smapi-mean,\
-            smapi-median, smdi, smca-mean, smca-median, smad, smci, smds, essmi, beta, gamma",
+            smapi-median, smdi, smca-mean, smca-median, smad, smci, smds, essmi,\
+                beta, gamma, abs-mean, abs-median",
     )
     parser.add_argument(
         "--timespan",
