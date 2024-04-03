@@ -165,6 +165,14 @@ def setup_argument_parser() -> ArgumentParser:
 
 
 def parse_arguments(parser):
+    """
+    Parse the arguments and return the parsed arguments as a dictionary.
+
+    returns:
+    --------
+    parsed_args: dict
+        The parsed arguments as a dictionary
+    """
     args: Namespace = parser.parse_args()
 
     aoi = args.aoi
@@ -196,7 +204,7 @@ def parse_arguments(parser):
 
 
 # Create a logger
-logger = create_logger("run_logger")
+logger = create_logger("workflow-logger")
 
 
 @log_exception(logger)
@@ -212,6 +220,24 @@ def load_ts(gpi, variable="sm"):
 
 
 def _validate_param(param_name: str, param_value: List[int]) -> None:
+    """
+    Validate the date parameters (year, month, dekad, week, bimonth, day) for the anomaly detection workflow.
+
+    Parameters:
+    -----------
+    param_name: str
+        The name of the parameter to validate
+
+    param_value: List[int]
+        The value of the parameter to validate
+
+    Raises:
+    -------
+    ValueError:
+        If the parameter value is None
+        If the parameter value is not a list of integers
+
+    """
 
     if param_value is None:
         raise ValueError(f"The '{param_name}' parameter must be provided")
@@ -224,6 +250,27 @@ def _validate_required_params(
     required_params: Dict[str, List[str]],
     local_vars: Dict[str, List[int]],
 ) -> None:
+    """
+    Check if the required parameters are provided for the given time_step.
+
+    Parameters:
+    -----------
+
+    time_step: str
+        The time step for the anomaly detection workflow
+
+    required_params: Dict[str, List[str]]
+        A dictionary containing the required parameters for each time step
+
+    local_vars: Dict[str, List[int]]
+        A dictionary containing the local variables
+
+    Raises:
+    -------
+    ValueError:
+        If any of the required parameters are missing
+
+    """
 
     missing_params = [
         param for param in required_params[time_step] if local_vars.get(param) is None
@@ -305,7 +352,19 @@ def validate_date_params(
 
 def validate_anomaly_method(methods):
     """
-    Validate the anomaly detection method
+    Validate the names of the anomaly detection methods.
+
+    Parameters:
+    -----------
+
+    methods: List[str]
+        A list of anomaly detection methods names to validate
+
+    Raises:
+    -------
+    ValueError:
+        If any of the methods is not supported
+
     """
 
     for method in methods:
@@ -339,7 +398,7 @@ def single_po_run(
     """
 
     # Load the time series for the given gpi
-    global ascat_obj
+    # global ascat_obj
     df = load_ts(gpi, variable=variable)
     # Validate the date parameters
     date_params = validate_date_params(
@@ -435,7 +494,7 @@ def run(
     print(f"Grid points loaded successfully for {aoi}\n")
     print(pointlist.head())
     print("\n")
-    pointlist = pointlist[:10]
+    # pointlist = pointlist[:10]
     pre_compute = partial(
         single_po_run,
         methods=methods,
