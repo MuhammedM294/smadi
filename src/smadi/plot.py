@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 from smadi.anomaly_detectors import *
 from smadi.metadata import indicators_thresholds
 
-matplotlib.use("Qt5Agg")
-
 
 def get_plot_options(**kwargs):
     """
@@ -33,7 +31,9 @@ def get_plot_options(**kwargs):
         "legend_labels": kwargs.get("legend_labels", None),
         "figsize": kwargs.get("figsize", None),
         "grid": kwargs.get("grid", None),
+        "savefig": kwargs.get("savefig", None),
     }
+
     return plot_options
 
 
@@ -64,6 +64,8 @@ def plot_figure(plot_params):
     # Show plot
     plt.grid(plot_params["grid"])
     plt.tight_layout()
+    if plot_params["savefig"] is not None:
+        plt.savefig(plot_params["savefig"])
     plt.show()
 
 
@@ -132,11 +134,14 @@ def clss_counter(df, columns, thresholds):
         The name of the anomaly method to use its thresholds.
     """
 
-    category_counter = {}
     results = []
     anomaly_thresholds = indicators_thresholds[thresholds]
 
+    if len(columns) > 2:
+        raise ValueError("The number of columns should not exceed 2.")
+
     for colm, _ in columns.items():
+        category_counter = {}
         for key, value in anomaly_thresholds.items():
             category_counter[key] = df[colm].between(value[0], value[1]).sum()
 
@@ -269,7 +274,8 @@ def plot_ts(
     """
     # Set values for kwargs based on provided values
     plot_params = get_plot_options(**kwargs)
-    plt.figure(figsize=plot_params["figsize"])
+    if plot_params["figsize"] is not None:
+        plt.figure(figsize=plot_params["figsize"])
 
     if plot_raw:
         plt.plot(

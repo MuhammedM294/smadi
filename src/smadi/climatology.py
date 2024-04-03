@@ -94,7 +94,6 @@ class Aggregator:
         Initializes the Aggregation class.
 
         """
-
         self.original_df = df
         self.var = variable
         self.fillna = fillna
@@ -102,32 +101,50 @@ class Aggregator:
         self.smoothing = smoothing
         self.smooth_window_size = smooth_window_size
         self.timespan = timespan
-
         self._validate_input()
-        self.df = pd.DataFrame(self.original_df[self.var]).resample("D").mean()
-        self.df = (
-            self.df.truncate(before=timespan[0], after=timespan[1])
-            if timespan
-            else self.df
-        )
-        self._fillna()
-        self._smooth()
-        self.df.dropna(inplace=True)
         self.resulted_df = pd.DataFrame()
 
-    def _fillna(self):
+    @property
+    def df(self):
+        """
+        Prepares the DataFrame for aggregation.
+        """
+
+        # Resample the data to daily frequency
+        _df = pd.DataFrame(self.original_df[self.var]).resample("D").mean()
+
+        # Truncate the data based on the timespan provided
+        _df = (
+            _df.truncate(before=self.timespan[0], after=self.timespan[1])
+            if self.timespan
+            else _df
+        )
+
+        # Validate the input parameters
+        self._validate_input()
+        _df = self._fillna(_df)
+        _df = self._smooth(_df)
+        _df.dropna(inplace=True)
+
+        return _df
+
+    def _fillna(self, df):
         """
         Fills NaN values in the time series data using a moving window average.
         """
         if self.fillna:
-            self.df[self.var] = fillna(self.df, self.var, self.fillna_window_size)
+            df[self.var] = fillna(df, self.var, self.fillna_window_size)
 
-    def _smooth(self):
+        return df
+
+    def _smooth(self, df):
         """
         Smooths the time series data using a moving window average.
         """
         if self.smoothing:
-            self.df[self.var] = smooth(self.df, self.var, self.smooth_window_size)
+            df[self.var] = smooth(df, self.var, self.smooth_window_size)
+
+        return df
 
     def _validate_df_index(self):
         """
