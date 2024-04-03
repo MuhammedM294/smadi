@@ -28,6 +28,60 @@ SMADI is a workflow designed to compute climate normals and detect anomalies for
 
 The core objective of SMADI is to leverage these anomaly indicators to identify and highlight extreme events such as droughts and floods, providing valuable insights for environmental monitoring and management. Additionally, SMADI is applicable to various meteorological variables.
 
+
+Installation
+------------
+
+User Installation
+~~~~~~~~~~~~~~~~~
+
+For users who simply want to use `smadi`, you can install it via pip:
+
+.. code-block:: bash
+
+    pip install smadi
+
+Developer Installation
+~~~~~~~~~~~~~~~~~~~~~~
+
+If you're a developer or contributor, follow these steps to set up `smadi`:
+
+1. Clone the repository:
+
+.. code-block:: bash
+
+    git clone https://github.com/yourusername/smadi.git
+
+2. Navigate to the cloned directory:
+
+.. code-block:: bash
+
+    cd smadi
+
+3. Create and activate a virtual environment using Conda or virtualenv:
+
+For Conda:
+
+.. code-block:: bash
+
+    conda create --name smadi_env python=3.8
+    conda activate smadi_env
+
+For virtualenv:
+
+.. code-block:: bash
+
+    virtualenv smadi_env
+    source smadi_env/bin/activate  # On Unix or MacOS
+    .\smadi_env\Scripts\activate    # On Windows
+
+4. Install dependencies from requirements.txt:
+
+.. code-block:: bash
+
+    pip install -r requirements.txt
+
+
 .. _pyscaffold-notes:
 
 Note
