@@ -398,7 +398,7 @@ def single_po_run(
     """
 
     # Load the time series for the given gpi
-    # global ascat_obj
+    global ascat_obj
     df = load_ts(gpi, variable=variable)
     # Validate the date parameters
     date_params = validate_date_params(
@@ -482,7 +482,6 @@ def run(
     """
     Run the anomaly detection workflow for multiple grid point indices with multiprocessing support.
     """
-    # Print workflow start message
     logger.info("\nWorkflow started....\n")
     logger.info(f"Loading grid points for {aoi}....")
 
@@ -512,17 +511,14 @@ def run(
         timespan=timespan,
     )
 
-    # Print the workflow initiation message
     logger.info(f"Running the anomaly detection workflow for {aoi}....\n")
 
-    # Print workflow parameters
     logger.info("Workflow parameters:\n")
     logger.info(f"    Anomaly detection methods: {', '.join(methods)}")
     logger.info(f"    Variable: {variable}")
     logger.info(f"    Time step for Climatology: {time_step}")
     logger.info(f"    Date parameters:\n")
 
-    # Print date parameters if available
     date_parameters = {
         "Year": year,
         "Month": month,
