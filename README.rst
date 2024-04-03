@@ -9,6 +9,10 @@
     :alt: PyPI-Server
     :target: https://pypi.org/project/smadi/
 
+.. image:: https://mybinder.org/badge_logo.svg
+    :alt: Binder
+    :target: https://mybinder.org/v2/gh/MuhammedM294/SMADI_Tutorial/main?labpath=Tutorial.ipynb
+
 .. image:: https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold
     :alt: Project generated with PyScaffold
     :target: https://pyscaffold.org/
