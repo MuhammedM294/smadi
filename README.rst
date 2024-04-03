@@ -10,9 +10,9 @@
     .. image:: https://img.shields.io/coveralls/github/<USER>/smadi/main.svg
         :alt: Coveralls
         :target: https://coveralls.io/r/<USER>/smadi
-    .. image:: https://img.shields.io/pypi/v/smadi.svg
-        :alt: PyPI-Server
-        :target: https://pypi.org/project/smadi/
+.. image:: https://img.shields.io/pypi/v/smadi.svg
+  :alt: PyPI-Server
+  :target: https://pypi.org/project/smadi/
     .. image:: https://img.shields.io/conda/vn/conda-forge/smadi.svg
         :alt: Conda-Forge
         :target: https://anaconda.org/conda-forge/smadi
