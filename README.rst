@@ -17,18 +17,16 @@
     :alt: Project generated with PyScaffold
     :target: https://pyscaffold.org/
 
-|
-
 =====
-SMADI: Soil Moisture Anomaly Detection Indicators 
+SMADI
 =====
 
+    Soil Moisture Anomaly Detection Indicators
 
-    Add a short description here!
 
+SMADI is a workflow designed to compute climate normals and detect anomalies for satellite soil moisture data, with a primary focus on `ASCAT <https://hsaf.meteoam.it/Products/ProductsList?type=soil_moisture>`_ surface soil moisture (SSM) products. The climatology, or climate normals, is computed to establish the distribution of SSM for each period and location. Subsequently, anomalies are computed accordingly.
 
-A longer description of your project goes here...
-
+The core objective of SMADI is to leverage these anomaly indicators to identify and highlight extreme events such as droughts and floods, providing valuable insights for environmental monitoring and management. Additionally, SMADI is applicable to various meteorological variables.
 
 .. _pyscaffold-notes:
 
