@@ -1,9 +1,5 @@
-import matplotlib
 import eomaps
-
 from smadi.metadata import indicators_thresholds
-
-matplotlib.use("Qt5Agg")
 
 
 def set_thresholds(method):

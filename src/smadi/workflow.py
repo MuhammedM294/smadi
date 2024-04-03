@@ -55,6 +55,12 @@ def setup_argument_parser() -> ArgumentParser:
 
     # Optional arguments
     parser.add_argument(
+        "--data_read_bulk",
+        type=bool,
+        default=False,
+        help="Read data in bulk mode. If 'True' all data will be read in memory",
+    )
+    parser.add_argument(
         "--variable",
         metavar="variable",
         type=str,
@@ -170,6 +176,7 @@ variable = args.variable
 time_step = args.time_step
 
 # Optional parameters
+data_read_bulk = args.data_read_bulk
 methods = args.methods
 workers = args.workers
 fillna = args.fillna
@@ -186,7 +193,7 @@ day = args.day
 save_to = args.save_to
 
 # Create an instance of the AscatData class
-ascat_obj = AscatData(data_path, False)
+ascat_obj = AscatData(data_path, data_read_bulk)
 
 # Create a logger
 logger = create_logger("run_logger")
@@ -428,7 +435,6 @@ def run(
     print(f"Grid points loaded successfully for {aoi}\n")
     print(pointlist.head())
     print("\n")
-    pointlist = pointlist[:100]
     pre_compute = partial(
         single_po_run,
         methods=methods,
