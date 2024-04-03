@@ -20,7 +20,7 @@
 |
 
 =====
-smadi
+SMADI: Soil Moisture Anomaly Detection Indicators 
 =====
 
 
