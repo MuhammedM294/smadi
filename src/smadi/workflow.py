@@ -483,18 +483,17 @@ def run(
     Run the anomaly detection workflow for multiple grid point indices with multiprocessing support.
     """
     # Print workflow start message
-    print("\nWorkflow started....\n")
-    print(f"Loading grid points for {aoi}....")
+    logger.info("\nWorkflow started....\n")
+    logger.info(f"Loading grid points for {aoi}....")
 
     if isinstance(aoi, str):
         pointlist = load_gpis_by_country(aoi)
     else:
         pointlist = get_gpis_from_bbox(aoi)
 
-    print(f"Grid points loaded successfully for {aoi}\n")
-    print(pointlist.head())
-    print("\n")
-    # pointlist = pointlist[:10]
+    logger.info(f"Grid points loaded successfully for {aoi}\n")
+    logger.info(f"\n\n{pointlist.head()}")
+    pointlist = pointlist[:10]
     pre_compute = partial(
         single_po_run,
         methods=methods,
@@ -514,14 +513,14 @@ def run(
     )
 
     # Print the workflow initiation message
-    print(f"Running the anomaly detection workflow for {aoi}....\n")
+    logger.info(f"Running the anomaly detection workflow for {aoi}....\n")
 
     # Print workflow parameters
-    print("Workflow parameters:\n")
-    print(f"    Anomaly detection methods: {', '.join(methods)}")
-    print(f"    Variable: {variable}")
-    print(f"    Time step for Climatology: {time_step}")
-    print(f"    Date parameters:\n")
+    logger.info("Workflow parameters:\n")
+    logger.info(f"    Anomaly detection methods: {', '.join(methods)}")
+    logger.info(f"    Variable: {variable}")
+    logger.info(f"    Time step for Climatology: {time_step}")
+    logger.info(f"    Date parameters:\n")
 
     # Print date parameters if available
     date_parameters = {
@@ -534,7 +533,7 @@ def run(
     }
     for param, value in date_parameters.items():
         if value:
-            print(f"     {param}: {value}")
+            logger.info(f"     {param}: {value}")
 
     with ProcessPoolExecutor(workers) as executor:
         results = executor.map(pre_compute, pointlist["point"])
@@ -567,9 +566,6 @@ def main():
     except ArgumentError as e:
         parser.error(str(e))
 
-    from time import time
-
-    start = time()
     df = run(
         aoi=args["aoi"],
         methods=args["methods"],
@@ -589,8 +585,7 @@ def main():
         workers=args["workers"],
     )
 
-    print(f"\nWorkflow completed in {time() - start} seconds\n")
-    print(df)
+    logger.info(f"\n\n {df}")
 
     if args["save_to"]:
         try:

@@ -32,7 +32,7 @@ def create_logger(name, level=logging.DEBUG):
     logger.setLevel(level)
 
     # create a file to store all the logs exceptions
-    logfile = logging.FileHandler("run_logger.log")
+    logfile = logging.FileHandler(f"{name}.log")
 
     # create a formatter and set the formatter for the handler
     formatter = logging.Formatter(
