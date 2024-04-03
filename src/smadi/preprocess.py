@@ -249,7 +249,7 @@ def clim_groupping(df: pd.DataFrame, time_step: str) -> list:
     Groups the DataFrame based on the provided time step for climatology computation.
 
     parameters:
-    ----------
+    -----------
 
     df: pd.DataFrame
         The DataFrame to be grouped.

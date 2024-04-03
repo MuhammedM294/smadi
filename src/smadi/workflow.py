@@ -164,36 +164,36 @@ def setup_argument_parser() -> ArgumentParser:
     return parser
 
 
-parser = setup_argument_parser()
-args: Namespace = parser.parse_args()
+def parse_arguments(parser):
+    args: Namespace = parser.parse_args()
 
-# Required parameters
-data_path = args.data_path
-aoi = args.aoi
-if "," in aoi:
-    aoi = tuple(map(float, aoi.split(",")))
-variable = args.variable
-time_step = args.time_step
+    aoi = args.aoi
+    if "," in aoi:
+        aoi = tuple(map(float, aoi.split(",")))
 
-# Optional parameters
-data_read_bulk = args.data_read_bulk
-methods = args.methods
-workers = args.workers
-fillna = args.fillna
-fillna_window_size = args.fillna_size
-smoothing = args.smoothing
-smooth_window_size = args.smooth_size
-timespan = args.timespan
-year = args.year
-month = args.month
-dekad = args.dekad
-week = args.week
-bimonth = args.bimonth
-day = args.day
-save_to = args.save_to
+    parsed_args = {
+        "data_path": args.data_path,
+        "aoi": aoi,
+        "variable": args.variable,
+        "time_step": args.time_step,
+        "data_read_bulk": args.data_read_bulk,
+        "methods": args.methods,
+        "workers": args.workers,
+        "fillna": args.fillna,
+        "fillna_size": args.fillna_size,
+        "smoothing": args.smoothing,
+        "smooth_size": args.smooth_size,
+        "timespan": args.timespan,
+        "year": args.year,
+        "month": args.month,
+        "dekad": args.dekad,
+        "week": args.week,
+        "bimonth": args.bimonth,
+        "day": args.day,
+        "save_to": args.save_to,
+    }
+    return parsed_args
 
-# Create an instance of the AscatData class
-ascat_obj = AscatData(data_path, data_read_bulk)
 
 # Create a logger
 logger = create_logger("run_logger")
@@ -435,6 +435,7 @@ def run(
     print(f"Grid points loaded successfully for {aoi}\n")
     print(pointlist.head())
     print("\n")
+    pointlist = pointlist[:10]
     pre_compute = partial(
         single_po_run,
         methods=methods,
@@ -486,9 +487,24 @@ def run(
 
 def main():
 
+    parser = setup_argument_parser()
+    args = parse_arguments(parser)
+
+    # Create an instance of the AscatData class
+    global ascat_obj
+    ascat_obj = AscatData(args["data_path"], args["data_read_bulk"])
+
     try:
-        validate_anomaly_method(methods)
-        validate_date_params(time_step, year, month, dekad, week, bimonth, day)
+        validate_anomaly_method(args["methods"])
+        validate_date_params(
+            args["time_step"],
+            args["year"],
+            args["month"],
+            args["dekad"],
+            args["week"],
+            args["bimonth"],
+            args["day"],
+        )
     except ArgumentError as e:
         parser.error(str(e))
 
@@ -496,31 +512,31 @@ def main():
 
     start = time()
     df = run(
-        aoi=aoi,
-        methods=methods,
-        variable=variable,
-        time_step=time_step,
-        year=year,
-        month=month,
-        week=week,
-        day=day,
-        bimonth=bimonth,
-        dekad=dekad,
-        timespan=timespan,
-        fillna=fillna,
-        fillna_window_size=fillna_window_size,
-        smoothing=smoothing,
-        smooth_window_size=smooth_window_size,
-        workers=workers,
+        aoi=args["aoi"],
+        methods=args["methods"],
+        variable=args["variable"],
+        time_step=args["time_step"],
+        year=args["year"],
+        month=args["month"],
+        week=args["week"],
+        day=args["day"],
+        bimonth=args["bimonth"],
+        dekad=args["dekad"],
+        timespan=args["timespan"],
+        fillna=args["fillna"],
+        fillna_window_size=args["fillna_size"],
+        smoothing=args["smoothing"],
+        smooth_window_size=args["smooth_size"],
+        workers=args["workers"],
     )
 
     print(f"\nWorkflow completed in {time() - start} seconds\n")
     print(df)
 
-    if save_to:
+    if args["save_to"]:
         try:
-            df.to_csv(save_to)
-            print(f"Saving the output data frame to {save_to}....")
+            df.to_csv(args["save_to"])
+            print(f"Saving the output data frame to {args['save_to']}....")
             print("Output saved successfully")
 
         except ArgumentError as e:

@@ -384,7 +384,7 @@ class Climatology(Aggregator):
     A class for calculating climatology(climate normal) for time series data.
 
     Attributes:
-    ----------
+    -----------
     df_original: pd.DataFrame
         The original input DataFrame before resampling and removing NaN values.
 
@@ -419,7 +419,7 @@ class Climatology(Aggregator):
         The DataFrame containing climatology information.
 
     Methods:
-    -------
+    --------
     aggregate:
         Aggregates the data based on the time step and metrics provided.
 
@@ -485,6 +485,7 @@ class Climatology(Aggregator):
         Validates the metrics to be used in the climatology computation.
 
         Raises:
+        -------
             ValueError: If the metric is not one of the supported values.
 
         """

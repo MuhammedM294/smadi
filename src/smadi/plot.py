@@ -13,7 +13,7 @@ def get_plot_options(**kwargs):
     parameters:
     -----------
 
-    **kwargs: dict
+    kwargs: dict
         The keyword arguments for the matplotlib plot.
 
     returns:
@@ -212,7 +212,7 @@ def plot_anomaly(
     plot_categories: bool
         Whether to plot the number of values in each category of the anomaly method that fall within the thresholds.
 
-    **kwargs: dict
+    kwargs: dict
         The keyword arguments for the matplotlib plot for the figure such as title, xlabel, ylabel, legend, figsize, and grid.
 
     """
@@ -268,7 +268,7 @@ def plot_ts(
     raw_kwargs: dict
         The dictionary containing the matplotlib plot options for the raw data.
 
-    **kwargs: dict
+    kwargs: dict
         The keyword arguments for the matplotlib plot for the figure such as title, xlabel, ylabel, legend, figsize, and grid.
 
     """

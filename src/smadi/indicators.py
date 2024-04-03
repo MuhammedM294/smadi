@@ -8,9 +8,9 @@ def zscore(obs, mean=None, std=None):
     Computes the standardized z-score of the time series data.
 
     Parameters:
-    ----------
+    -----------
     obs: pd.Series or np.ndarray or sequence-like object
-        The time series data.
+        The observed time series data.
 
     mean: float, pd.Series or np.ndarray or sequence-like object, optional
         The mean of the distribution of the time series data. If None, it will be computed from `obs`.
@@ -19,7 +19,7 @@ def zscore(obs, mean=None, std=None):
         The standard deviation of the distribution of the time series data. If None, it will be computed from `obs`.
 
     Returns:
-    -------
+    --------
     pd.Series or np.ndarray
         The z-score of the time series data.
     """
@@ -36,7 +36,7 @@ def smapi(obs, ref=None, metric="mean"):
     Computes anomalies in time series data based on the Soil Moisture Anomaly Percent Index(SMAPI) method.
 
     parameters:
-    ----------
+    -----------
 
     obs: pd.Series or np.ndarray or sequence-like object
         The observed time series data.
@@ -63,7 +63,7 @@ def smd(obs, median=None, minimum=None, maximum=None):
     Computes the Soil Moisture Deficit (SD) based on observed value and long-term median, minimum, and maximum values.
 
     parameters:
-    ----------
+    -----------
 
     obs: pd.Series or np.ndarray or sequence-like object
         The observed time series data.
@@ -114,7 +114,7 @@ def smad(obs, median=None, iqr=None):
     Computes the anomalies in time series data based on the Standardized Median Absolute Deviation(SMAD) method.
 
     parameters:
-    ----------
+    -----------
 
     obs: pd.Series or np.ndarray or sequence-like object
         The observed time series data.
@@ -147,7 +147,7 @@ def smca(obs, metric="mean", ref=None, minimum=None, maximum=None):
     Computes the anomalies in time series data based on the Soil Moisture Content Anomaly(SMCA) method.
 
     parameters:
-    ----------
+    -----------
 
     obs: pd.Series or np.ndarray or sequence-like object
         The observed time series data.
@@ -187,7 +187,7 @@ def smci(obs, minimum=None, maximum=None):
     Computes the anomalies in time series data based on the Soil Moisture Condition Index(SMCI) method.
 
     parameters:
-    ----------
+    -----------
 
     obs: pd.Series or np.ndarray or sequence-like object
         The observed time series data.
@@ -218,7 +218,7 @@ def smds(obs):
     SMP = (rank(x) / (n+1))
 
     parameters:
-    ----------
+    -----------
 
     obs: pd.Series or np.ndarray or sequence-like object
         The observed time series data.
@@ -239,9 +239,9 @@ def essmi(obs):
     Compute the anomalies in time series data based on the Empirical Standardized Soil Moisture Index(ESSMI) method.
 
     parameters:
-    ----------
+    -----------
 
-    obs: pd.Series or np.ndarray or sequence-like object
+    obs: sequence-like object
         The observed time series data.
 
     returns:
@@ -263,9 +263,9 @@ def para_dis(obs, dist="beta"):
     Compute the anomalies in time series data based on fitting the observed data to a parametric distribution.
 
     parameters:
-    ----------
+    -----------
 
-    obs: pd.Series or np.ndarray or sequence-like object
+    obs: sequence-like object
         The observed time series data.
 
     dist: str, optional

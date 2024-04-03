@@ -14,7 +14,7 @@ def create_logger(name, level=logging.DEBUG):
     Create a logger with the given name and level
 
     parameters:
-    ----------
+    -----------
 
     name: str
         name of the logger
@@ -22,7 +22,7 @@ def create_logger(name, level=logging.DEBUG):
         level of the logger
 
     returns:
-    -------
+    --------
     logger: logging.logger
         a logger object
     """
@@ -49,12 +49,12 @@ def log_exception(logger):
     A decorator to log exceptions in a function
 
     parameters:
-    ----------
+    -----------
     logger: logging.logger
         a logger object
 
     returns:
-    -------
+    --------
     decorator: function
         a decorator function
 
@@ -80,13 +80,13 @@ def log_time(logger):
     A decorator to log the time taken by a function
 
     parameters:
-    ----------
+    -----------
 
     logger: logging.logger
         a logger object
 
     returns:
-    -------
+    --------
 
     decorator: function
         a decorator function
@@ -112,13 +112,13 @@ def get_country_code(country_name):
     Get the ISO 3166-1 alpha-3 country code for a given country name.
 
     parameters:
-    ----------
+    -----------
 
     country_name: str
         name of the country
 
     returns:
-    -------
+    --------
 
     country_code: str
         ISO 3166-1 alpha-3 country code
@@ -138,7 +138,7 @@ def load_gpis_by_country(country, res=6.25, format="csv"):
     Source: https://dgg.geo.tuwien.ac.at/
 
     parameters:
-    ----------
+    -----------
     country: str
         name of the country
 
@@ -183,6 +183,24 @@ def load_gpis_by_country(country, res=6.25, format="csv"):
 
 
 def get_gpis_from_bbox(bbox, res=6.25):
+    """
+    Get the GPIS based on the bounding box
+
+    parameters:
+    -----------
+
+    bbox: tuple
+        bounding box in the format (lonmin, lonmax, latmin, latmax)
+
+    res: float
+        resolution of the grid. Default is 6.25 km
+
+    returns:
+    --------
+
+    pd.DataFrame
+        a dataframe containing the GPIS, longitude, and latitude
+    """
 
     lonmin, lonmax, latmin, latmax = bbox
     grid = FibLandGrid(res)
