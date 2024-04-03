@@ -37,7 +37,7 @@ User Installation
 
 For users who simply want to use `smadi`, you can install it via pip:
 
-.. code-block:: bash
+.. code-block:: 
 
     pip install smadi
 
@@ -48,13 +48,13 @@ If you're a developer or contributor, follow these steps to set up `smadi`:
 
 1. Clone the repository:
 
-.. code-block:: bash
+.. code-block:: 
 
-    git clone https://github.com/yourusername/smadi.git
+    git clone https://github.com/MuhammedM294/smadi
 
 2. Navigate to the cloned directory:
 
-.. code-block:: bash
+.. code-block:: 
 
     cd smadi
 
@@ -62,14 +62,14 @@ If you're a developer or contributor, follow these steps to set up `smadi`:
 
 For Conda:
 
-.. code-block:: bash
+.. code-block:: 
 
     conda create --name smadi_env python=3.8
     conda activate smadi_env
 
 For virtualenv:
 
-.. code-block:: bash
+.. code-block:: 
 
     virtualenv smadi_env
     source smadi_env/bin/activate  # On Unix or MacOS
@@ -77,9 +77,11 @@ For virtualenv:
 
 4. Install dependencies from requirements.txt:
 
-.. code-block:: bash
+.. code-block::
 
     pip install -r requirements.txt
+
+
 
 
 .. _pyscaffold-notes:
