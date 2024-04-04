@@ -84,12 +84,7 @@ def plot_anomaly_map(
     bins=None,
     labels=None,
     add_gridlines=True,
-    g_kwargs={
-        "d": (2, 2),
-        "ec": "grey",
-        "ls": "--",
-        "lw": 0.01,
-    },
+    g_kwargs={"d": (2, 2), "ec": "grey", "ls": "--", "lw": 0.01},
     vmin=None,
     vmax=None,
     add_colorbar=True,
@@ -170,6 +165,11 @@ def plot_anomaly_map(
     m.set_shape.rectangles(radius=0.05)
     m.set_frame(linewidth=0.5)
 
+    m.add_feature.preset.coastline(lw=0.6)
+    m.add_feature.preset.countries(lw=0.4, ls="--")
+    m.add_feature.preset.ocean()
+    m.add_feature.preset.land()
+
     # Set data and parameter
     m.set_data(data=df, parameter=colm, x=x, y=y, crs=crs)
 
@@ -188,6 +188,8 @@ def plot_anomaly_map(
     if add_gridlines:
         g = m.add_gridlines(**g_kwargs)
         g.add_labels(fontsize=8)
+        g.bottom_labels = True
+        g.right_labels = True
 
     # Set vmin and vmax based on the thresholds min and max
     vmin = bins[0] if vmin is None else vmin
@@ -202,6 +204,9 @@ def plot_anomaly_map(
     if add_colorbar:
         cb = m.add_colorbar(
             pos=cb_kwargs["pos"],
+            spacing="uniform",
+            label=False,
+            orientation="vertical",
         )
         cb.tick_params(labelsize=cb_kwargs["labelsize"])
         cb.set_bin_labels(
@@ -212,3 +217,111 @@ def plot_anomaly_map(
         )
 
     m.show()
+
+
+def plot_multiple_maps(
+    df,
+    parameters,
+    titles,
+    cmap="RdYlBu",
+    figsize=(25, 20),
+    ax_rows=2,
+    ax_cols=5,
+    add_gridlines=False,
+):
+    m = eomaps.Maps(ax=(ax_rows, ax_cols, 1), figsize=figsize, frameon=True)
+    ax = m.ax
+    ax.text(
+        5,
+        5,
+        "SM Anomaly Maps",
+        fontsize=20,
+        ha="center",
+        va="center",
+        transform=ax.transAxes,
+    )
+    cb_kwargs = {
+        "pos": 0.4,
+        "labelsize": 0.5,
+        "tick_lines": "center",
+        "show_values": False,
+    }
+
+    for i, parameter in enumerate(parameters):
+        ax_index = i + 1
+        if i == 0:
+            m = m
+        else:
+            m = m.new_map(ax=(ax_rows, ax_cols, ax_index), figsize=(7, 7))
+        m.ax.set_title(titles[i], pad=7, linespacing=0.5)
+        m.set_shape.rectangles(radius=0.05)
+        m.add_feature.preset.coastline(lw=0.6)
+        m.add_feature.preset.countries(lw=0.4, ls="--")
+        m.add_feature.preset.ocean()
+        m.add_feature.preset.land()
+        extent = set_extent(df, x="lon", y="lat", buffer=3.25)
+        m.ax.set_extent(extent, eomaps.Maps.CRS.PlateCarree())
+        m.set_frame(linewidth=0.5)
+        m.set_data(data=df, parameter=parameter, x="lon", y="lat", crs=4326)
+
+        if add_gridlines:
+            g = m.add_gridlines(
+                d=(2, 2),
+                ec="grey",
+                ls="--",
+                lw=0.01,
+            )
+            g.add_labels(fontsize=8)
+        bins, labels = set_bins(parameter)
+        vmin = bins[0]
+        vmax = bins[-1]
+        m.set_classify.UserDefined(bins=bins)
+        if parameter.split("(")[0] == "smds":
+            cmap = cmap + "_r"
+        m.plot_map(vmin=vmin, vmax=vmax, cmap=cmap, lw=1.5)
+        cb = m.add_colorbar(
+            label=False, spacing="uniform", pos=0.4, orientation="vertical"
+        )
+        cb.set_hist_size(0.8)
+        cb.tick_params(rotation=0, labelsize=10, pad=5)
+        cb.set_bin_labels(
+            bins=bins,
+            names=labels,
+            tick_lines=cb_kwargs["tick_lines"],
+            show_values=cb_kwargs["show_values"],
+        )
+
+    m.show()
+
+
+if __name__ == "__main__":
+    import pandas as pd
+
+    df = pd.read_csv("results.csv")
+    df.dropna(inplace=True)
+    parameters = [
+        "zscore(2021-7)",
+        "smad(2021-7)",
+        "smapi-mean(2021-7)",
+        "smdi(2021-7)",
+        "essmi(2021-7)",
+        "smci(2021-7)",
+        "gamma(2021-7)",
+        "beta(2021-7)",
+        "smds(2021-7)",
+    ]
+    titles = [
+        "ZScore",
+        "SMAD",
+        "SMAPI",
+        "SMDI",
+        "ESSMI",
+        "SMCI",
+        "Gamma",
+        "Beta",
+        "SMDS",
+    ]
+    plot_multiple_maps(
+        df, parameters, titles, ax_rows=3, ax_cols=3, add_gridlines=False
+    )
+    # plot_anomaly_map(df, "zscore(2021-7)", add_colorbar=True, add_gridlines=True)
