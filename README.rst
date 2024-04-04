@@ -28,6 +28,13 @@ SMADI is a workflow designed to compute climate normals and detect anomalies for
 
 The core objective of SMADI is to leverage these anomaly indicators to identify and highlight extreme events such as droughts and floods, providing valuable insights for environmental monitoring and management. Additionally, SMADI is applicable to various meteorological variables.
 
+Germany SM Anomaly Maps July 2021
+---------------------------------
+
+.. image:: https://github.com/MuhammedM294/SMADI_Tutorial/assets/89984604/a8b7abb5-9636-4e82-8152-877397a61c3b>
+      :alt: Germany SM Anomaly Maps July 2021
+      :align: center
+
 
 Installation
 ------------
