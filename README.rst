@@ -3,7 +3,7 @@
 
 .. image:: https://readthedocs.org/projects/smadi/badge/?version=latest
     :alt: ReadTheDocs
-    :target: https://smadi.readthedocs.io/en/stable/
+    :target: https://smadi.readthedocs.io/en/latest/readme.html
 
 .. image:: https://img.shields.io/pypi/v/smadi.svg
     :alt: PyPI-Server
