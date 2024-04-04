@@ -492,7 +492,6 @@ def run(
 
     logger.info(f"Grid points loaded successfully for {aoi}\n")
     logger.info(f"\n\n{pointlist.head()}")
-    pointlist = pointlist[:10]
     pre_compute = partial(
         single_po_run,
         methods=methods,
@@ -586,8 +585,8 @@ def main():
     if args["save_to"]:
         try:
             df.to_csv(args["save_to"])
-            print(f"Saving the output data frame to {args['save_to']}....")
-            print("Output saved successfully")
+            logger.info(f"Saving the output data frame to {args['save_to']}....")
+            logger.info("Output saved successfully")
 
         except ArgumentError as e:
             parser.error(str(e))
