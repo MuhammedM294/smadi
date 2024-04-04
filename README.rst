@@ -178,27 +178,30 @@ For Single Point
    
       anomaly_df = smapi.detect_anomaly()
 
-For Country Scale
-~~~~~~~~~~~~~~~~~
+For Country Scale Computation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To apply the workflow on a country scale, utilize the 'run' command specifying either the country name or bounding box (bbox) to set the area of interest (AOI) using coordinates (minlon, maxlon, minlat, maxlat).
 For more information on the available arguments, you can run `run -h` command.
 
 .. code-block::
 
      # Run the workflow for a country
-     run "path/to/data" "country_name" "time_step" --year <> --month <>  --method <>  --save_to <>
+     run "path/to/data" \
+         "country_name" \
+         "time_step" \
+          --year <> \
+          --month <>  \
+          --method <>  \
+          --save_to <>
 
      # Run the workflow for bbox
-     run "path/to/data" "minlon, maxlon, minlat, maxlat" "time_step" --year <> --month <>  --method <>  --save_to <>
-
-
-
-
-    
-
-
-
-
+     run "path/to/data"\
+         "minlon, maxlon, minlat, maxlat"\
+         "time_step" \
+         --year <> \
+         --month <>  \
+         --method <>  \
+         --save_to <>
 
 
 
