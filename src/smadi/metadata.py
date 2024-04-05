@@ -83,4 +83,28 @@ indicators_thresholds = {
         "W-3": (0.95, 0.98),
         "W-4": (0.98, 1),
     },
+    # Still under review , threshold values are defined based on the percentiles
+    "smca": {
+        "D-4": (-1, -0.55),
+        "D-3": (-0.55, -0.5),
+        "D-2": (-0.5, -0.40),
+        "D-1": (-0.40, -0.25),
+        "NN": (-0.25, 0.25),
+        "W-1": (0.25, 0.40),
+        "W-2": (0.40, 0.5),
+        "W-3": (0.5, 0.55),
+        "W-4": (0.55, 1),
+    },
+    # Still under review , threshold values are defined based on the percentiles
+    "abs": {
+        "D-4": (-20, -18.5),
+        "D-3": (-18.5, -13.5),
+        "D-2": (-13.5, -10),
+        "D-1": (-10, -6.5),
+        "NN": (-6.5, 6.5),
+        "W-1": (6.5, 10),
+        "W-2": (10, 13.5),
+        "W-3": (13.5, 18.5),
+        "W-4": (18.5, 20),
+    },
 }
