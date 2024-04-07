@@ -142,58 +142,6 @@ class AnomalyDetector(Climatology):
         return filter_df(self.clim_df, **kwargs)
 
 
-class AbsoluteAnomaly(AnomalyDetector):
-    """
-    A class for detecting anomalies in time series data based on the absolute deviation value from the climate normal.
-
-    SMA = x - ref
-
-        where:
-        x: the average value of the variable in the time series data. It can be any of the following:
-        Daily average, weekly average, monthly average, etc.
-        ref: the long-term mean (μ) or median (η) of the variable(the climate normal).
-
-    """
-
-    def __init__(
-        self,
-        df: pd.DataFrame,
-        variable: str,
-        fillna: bool = False,
-        fillna_window_size: int = None,
-        smoothing=False,
-        smooth_window_size=None,
-        timespan: List[str] = None,
-        time_step: str = "month",
-        normal_metrics: List[str] = ["mean"],
-    ):
-        super().__init__(
-            df,
-            variable,
-            fillna,
-            fillna_window_size,
-            smoothing,
-            smooth_window_size,
-            timespan,
-            time_step,
-            normal_metrics,
-        )
-
-    def _preprocess(self, **kwargs) -> pd.DataFrame:
-        super()._preprocess(**kwargs)
-        return self.clim_df
-
-    def detect_anomaly(self, **kwargs) -> pd.DataFrame:
-        super().detect_anomaly(**kwargs)
-
-        for metric in self.normal_metrics:
-            self.clim_df[f"abs-{metric}"] = (
-                self.clim_df[f"{self.var}-avg"] - self.clim_df[f"norm-{metric}"]
-            )
-
-        return filter_df(self.clim_df, **kwargs)
-
-
 class ZScore(AnomalyDetector):
     """
     A class for detecting anomalies in time series data based on the Z-Score method.
@@ -674,8 +622,3 @@ if __name__ == "__main__":
 
     po = 4854801
     sm_ts = extract_obs_ts(po, ascat_path, obs_type="sm", read_bulk=False)
-    df = AbsoluteAnomaly(
-        sm_ts, "sm", time_step="month", normal_metrics=["mean", "median"]
-    ).detect_anomaly()
-
-    print(df)
