@@ -451,7 +451,7 @@ class Climatology(Aggregator):
         self.time_step = time_step
         self.normal_metrics = normal_metrics
         self.valid_time_steps = ["month", "dekad", "week", "day", "bimonth"]
-        self.valid_metrics = ["mean", "median", "min", "max"]
+        self.valid_metrics = ["mean", "median", "min", "max", "std"]
         super().__init__(
             df,
             variable,

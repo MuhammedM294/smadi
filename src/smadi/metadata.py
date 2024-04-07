@@ -8,13 +8,10 @@ from smadi.anomaly_detectors import (
     SMDS,
     ESSMI,
     ParaDis,
-    AbsoluteAnomaly,
 )
 
 # Supported anomaly detection methods
 _Detectors = {
-    "abs-mean": AbsoluteAnomaly,
-    "abs-median": AbsoluteAnomaly,
     "zscore": ZScore,
     "smapi-mean": SMAPI,
     "smapi-median": SMAPI,
@@ -95,16 +92,40 @@ indicators_thresholds = {
         "W-3": (0.5, 0.55),
         "W-4": (0.55, 1),
     },
-    # Still under review , threshold values are defined based on the percentiles
-    "abs": {
-        "D-4": (-20, -18.5),
-        "D-3": (-18.5, -13.5),
-        "D-2": (-13.5, -10),
-        "D-1": (-10, -6.5),
-        "NN": (-6.5, 6.5),
-        "W-1": (6.5, 10),
-        "W-2": (10, 13.5),
-        "W-3": (13.5, 18.5),
-        "W-4": (18.5, 20),
+    "smad": {
+        "D-3": (-3, -2),
+        "D-2": (-2, -1.5),
+        "D-1": (-1.5, -1),
+        "NN": (-1, 1),
+        "W-1": (1, 1.5),
+        "W-2": (1.5, 2),
+        "W-3": (2, 3),
+    },
+    "beta": {
+        "D-3": (-3, -2),
+        "D-2": (-2, -1.5),
+        "D-1": (-1.5, -1),
+        "NN": (-1, 1),
+        "W-1": (1, 1.5),
+        "W-2": (1.5, 2),
+        "W-3": (2, 3),
+    },
+    "gamma": {
+        "D-3": (-3, -2),
+        "D-2": (-2, -1.5),
+        "D-1": (-1.5, -1),
+        "NN": (-1, 1),
+        "W-1": (1, 1.5),
+        "W-2": (1.5, 2),
+        "W-3": (2, 3),
+    },
+    "essmi": {
+        "D-3": (-3, -2),
+        "D-2": (-2, -1.5),
+        "D-1": (-1.5, -1),
+        "NN": (-1, 1),
+        "W-1": (1, 1.5),
+        "W-2": (1.5, 2),
+        "W-3": (2, 3),
     },
 }

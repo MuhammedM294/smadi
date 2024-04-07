@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import gaussian_kde
 from scipy.stats import norm, beta, gamma
+from scipy.stats import percentileofscore
 
 
 def zscore(obs, mean=None, std=None):
@@ -265,7 +266,7 @@ def para_dis(obs, dist="beta"):
     parameters:
     -----------
 
-    obs: sequence-like object
+    obs: pd.Series or np.ndarray or sequence-like object
         The observed time series data.
 
     dist: str, optional
