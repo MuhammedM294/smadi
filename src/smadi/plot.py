@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from smadi.anomaly_detectors import *
 from smadi.metadata import indicators_thresholds
+from smadi.map import set_thresholds
 
 
 def get_plot_options(**kwargs):
@@ -59,7 +60,7 @@ def plot_figure(plot_params):
         if plot_params["legend_labels"] is not None:
             plt.legend(plot_params["legend_labels"])
         else:
-            plt.legend()
+            plt.legend(loc="lower left")
 
     # Show plot
     plt.grid(plot_params["grid"])
@@ -103,6 +104,7 @@ def draw_hbars(thresholds, x_axis):
     x_axis: list
         The x-axis values for the plot.
     """
+    thresholds = set_thresholds(thresholds)
     for key, value in thresholds.items():
         alpha = (
             int(key.split("-")[1]) * 0.2
@@ -135,7 +137,7 @@ def clss_counter(df, columns, thresholds):
     """
 
     results = []
-    anomaly_thresholds = indicators_thresholds[thresholds]
+    anomaly_thresholds = set_thresholds(thresholds)
 
     if len(columns) > 2:
         raise ValueError("The number of columns should not exceed 2.")
@@ -169,7 +171,8 @@ def plot_categories_count(x_axis, results, anomaly_method):
     """
     for i, result in enumerate(results):
         for key, value in result.items():
-            y = indicators_thresholds[anomaly_method][key][1]
+            thresholds = set_thresholds(anomaly_method)
+            y = thresholds[key][1]
             x = x_axis[0] if i == 0 else x_axis[-1]
             halignment = "right" if i == 0 else "left"
             plt.text(
@@ -223,7 +226,7 @@ def plot_anomaly(
     plot_colmns(df, x_axis, colmns)
 
     if plot_hbars:
-        draw_hbars(indicators_thresholds[thresholds], x_axis)
+        draw_hbars(thresholds, x_axis)
     if plot_categories:
         results = clss_counter(df, colmns, thresholds)
         plot_categories_count(x_axis, results, thresholds)

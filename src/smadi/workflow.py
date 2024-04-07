@@ -30,7 +30,7 @@ def setup_argument_parser() -> ArgumentParser:
     Setup argument parser for SMADI workflow execution.
     """
     parser = ArgumentParser(
-        description="Run the SMADI workflow for anomaly detection in ASCAT data"
+        description="Run the SMADI workflow for anomaly detection on ASCAT data"
     )
 
     # Required arguments
@@ -42,7 +42,7 @@ def setup_argument_parser() -> ArgumentParser:
         metavar="aoi",
         type=str,
         help="Country name or bounding box coordinates\
-        in the tuple 'lon_min, lon_max , lat_min, lat_max'",
+        in str format 'lon_min, lon_max , lat_min, lat_max'",
     )
     parser.add_argument(
         "time_step",
@@ -152,7 +152,16 @@ def setup_argument_parser() -> ArgumentParser:
         metavar="workers",
         type=int,
         default=None,
-        help="The number of workers to use for multiprocessing",
+        help="The number of workers to determine the degree of concurrent processing in a multiprocessing setup",
+    )
+
+    parser.add_argument(
+        "--addi_retrive",
+        metavar="addi_retrive",
+        type=str,
+        nargs="*",
+        default=None,
+        help="Additional parameters to retrieve from the anomaly dataframe. Supported values: 'var', 'norm' , 'abs'",
     )
     parser.add_argument(
         "--save_to",
@@ -198,6 +207,7 @@ def parse_arguments(parser):
         "week": args.week,
         "bimonth": args.bimonth,
         "day": args.day,
+        "addi_retrive": args.addi_retrive,
         "save_to": args.save_to,
     }
     return parsed_args
@@ -375,6 +385,47 @@ def validate_anomaly_method(methods):
             )
 
 
+def addi_retrival(
+    addi_retrive: list = ["var", "norm", "abs"],
+    results: pd.DataFrame = None,
+    anomaly: pd.DataFrame = None,
+    variable: str = None,
+    date_str: str = None,
+):
+    """
+    Validate and retrieve additional parameters from the anomaly dataframe.
+    """
+
+    if addi_retrive is not None:
+
+        # if not all(value in ["var", "norm"] for value in addi_retrive):
+        #     raise ValueError(
+        #         "The additional retrieval parameters must be one of the following: 'var', 'norm'"
+        #     )
+
+        if "var" in addi_retrive:
+            results[f"{variable}-avg" + f"({date_str})"] = anomaly[
+                f"{variable}-avg"
+            ].values
+        if "norm" in addi_retrive:
+            if "norm-mean" in anomaly.columns:
+                results["norm-mean" + f"({date_str})"] = anomaly["norm-mean"].values
+            if "norm-median" in anomaly.columns:
+                results["norm-median" + f"({date_str})"] = anomaly["norm-median"].values
+
+        if "abs" in addi_retrive:
+            if "norm-mean" in anomaly.columns:
+                results["abs-mean" + f"({date_str})"] = (
+                    anomaly[f"{variable}-avg"].values - anomaly["norm-mean"].values
+                )
+            if "norm-median" in anomaly.columns:
+                results["abs-median" + f"({date_str})"] = (
+                    anomaly[f"{variable}-avg"].values - anomaly["norm-median"].values
+                )
+
+    return results
+
+
 @log_exception(logger)
 def single_po_run(
     gpi: int,
@@ -392,6 +443,7 @@ def single_po_run(
     bimonth: Union[int, List[int]] = None,
     day: Union[int, List[int]] = None,
     timespan: List[str] = None,
+    addi_retrive: list = ["var", "norm"],
 ) -> Tuple[int, Dict[str, float]]:
     """
     Run the anomaly detection workflow for a single grid point index.
@@ -438,7 +490,15 @@ def single_po_run(
                     **date_param
                 )
                 date_str = f"-".join(str(value) for value in date_param.values())
-                results[method + f"({date_str})"] = anomaly[method].values[0]
+                results[method + f"({date_str})"] = anomaly[method].values
+
+                results = addi_retrival(
+                    addi_retrive=addi_retrive,
+                    results=results,
+                    anomaly=anomaly,
+                    variable=variable,
+                    date_str=date_str,
+                )
 
         except AttributeError as e:
             return None
@@ -478,11 +538,12 @@ def run(
     bimonth: List[int] = None,
     day: List[int] = None,
     workers: int = None,
+    addi_retrive: list = ["anomaly"],
 ) -> pd.DataFrame:
     """
     Run the anomaly detection workflow for multiple grid point indices with multiprocessing support.
     """
-    logger.info("\nWorkflow started....\n")
+    logger.info("Workflow started....\n")
     logger.info(f"Loading grid points for {aoi}....")
 
     if isinstance(aoi, str):
@@ -508,6 +569,7 @@ def run(
         bimonth=bimonth,
         day=day,
         timespan=timespan,
+        addi_retrive=addi_retrive,
     )
 
     logger.info(f"Running the anomaly detection workflow for {aoi}....\n")
@@ -578,6 +640,7 @@ def main():
         smoothing=args["smoothing"],
         smooth_window_size=args["smooth_size"],
         workers=args["workers"],
+        addi_retrive=args["addi_retrive"],
     )
 
     logger.info(f"\n\n {df}")

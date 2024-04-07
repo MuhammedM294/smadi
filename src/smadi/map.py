@@ -14,10 +14,10 @@ def set_thresholds(method):
         'zscore', 'smapi', 'smdi', 'smca', 'smad', 'smci', 'smds', 'essmi', 'beta', 'gamma'
     """
 
-    if method in ["beta", "gamma", "essmi", "zscore", "smad"]:
-        return indicators_thresholds["zscore"]
-    else:
+    if method in indicators_thresholds.keys():
         return indicators_thresholds[method]
+    else:
+        return None
 
 
 def set_extent(df, x="lon", y="lat", buffer=2):
@@ -63,6 +63,8 @@ def set_bins(colm):
         method = method.split("-")[0]
 
     thrsholds = set_thresholds(method)
+    if not thrsholds:
+        return None
     bins = [val[1] for val in thrsholds.values()]
     labels = [key for key in thrsholds.keys()]
     labels.insert(0, labels[0])
@@ -90,7 +92,7 @@ def plot_anomaly_maps(
         "fontweight": "bold",
     },
     maps_titles=None,
-    maps_titles_kwargs={"pad": 10, "fontsize": 12, "fontweight": "bold"},
+    maps_titles_kwargs={"pad": 20, "fontsize": 12, "fontweight": "bold"},
     add_features=True,
     frame_line_width=1,
     cmap="RdYlBu",
@@ -131,10 +133,29 @@ def plot_anomaly_maps(
                 lw=0.01,
             )
             g.add_labels(fontsize=8)
-        bins, labels = set_bins(colm)
-        vmin = bins[0]
-        vmax = bins[-1]
+        clss = set_bins(colm)
+        bins = clss[0] if clss else [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        labels = (
+            clss[1]
+            if clss
+            else [
+                "0-10",
+                "10-20",
+                "20-30",
+                "30-40",
+                "40-50",
+                "50-60",
+                "60-70",
+                "70-80",
+                "80-90",
+                "90-100",
+            ]
+        )
+        vmin = clss[0][0] if clss else df[colm].min()
+        vmax = clss[0][-1] if clss else df[colm].max()
+
         m.set_classify.UserDefined(bins=bins)
+
         if colm.split("(")[0] == "smds":
             cmap = cmap + "_r"
         m.plot_map(vmin=vmin, vmax=vmax, cmap=cmap, lw=1.5)
@@ -142,13 +163,16 @@ def plot_anomaly_maps(
             label=False, spacing="uniform", pos=0.4, orientation="vertical"
         )
         cb.set_hist_size(0.8)
-        # cb.tick_params(rotation=0, labelsize=10, pad=5)
-        # cb.set_bin_labels(
-        #     bins=bins,
-        #     names=labels,
-        #     tick_lines=cb_kwargs["tick_lines"],
-        #     show_values=cb_kwargs["show_values"],
-        # )
+        cb.tick_params(rotation=0, labelsize=10, pad=5)
+
+        if clss:
+            bins, labels = clss
+            cb.set_bin_labels(
+                bins=bins,
+                names=labels,
+                tick_lines=cb_kwargs["tick_lines"],
+                show_values=cb_kwargs["show_values"],
+            )
 
     m.show()
 
@@ -156,13 +180,28 @@ def plot_anomaly_maps(
 if __name__ == "__main__":
     import pandas as pd
 
-    df = pd.read_csv("results.csv")
+    df = pd.read_csv("test1.csv")
     df.dropna(inplace=True)
-    parameters = ["zscore(2021-7)", "smad(2021-7)", "smci(2021-7)", "smdi(2021-7)"]
-    titles = ["ZScore", "SMAD", "SMCI", "SMDI"]
+
+    parameters = [
+        "sm-avg(2021-7)",
+        "norm-mean(2021-7)",
+        "abs-mean(2021-7)",
+        "abs-median(2021-7)",
+        "zscore(2021-7)",
+        "smad(2021-7)",
+    ]
+    titles = [
+        "SSM Average ",
+        "Climatology",
+        "Absolute Anomaly- Mean",
+        "Absolute Anomaly- Median",
+        "Z-Score",
+        "SMAD",
+    ]
     plot_anomaly_maps(
-        figsize=(10, 10),
-        ax_cols=2,
+        figsize=(25, 20),
+        ax_cols=3,
         ax_rows=2,
         df=df,
         df_colms=parameters,
