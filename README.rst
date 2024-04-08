@@ -49,6 +49,21 @@ The following indices are provided:
       :align: center
 
 
+Workflow Processing
+-------------------
+
+The package installation through pip, will enable a command-line entry point for calculating anomalies using one or more of the available methods across various dates. The command, named 'run', is designed to compute indices for gridded NetCDF datasets. This Python entry point is intended to be executed through a bash shell command:
+
+.. code-block::
+
+   run <positional arguments> <options>
+
+For more information about the positional and optional arguments of this command, run:
+
+.. code-block::
+
+   run -h 
+
 Installation
 ------------
 
@@ -60,6 +75,7 @@ For users who simply want to use `smadi`, you can install it via pip:
 .. code-block:: 
 
     pip install smadi
+
 
 Developer Installation
 ~~~~~~~~~~~~~~~~~~~~~~
