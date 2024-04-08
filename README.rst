@@ -28,6 +28,19 @@ SMADI is a workflow designed to compute climate normals and detect anomalies for
 
 The core objective of SMADI is to leverage these anomaly indicators to identify and highlight extreme events such as droughts and floods, providing valuable insights for environmental monitoring and management. Additionally, SMADI is applicable to various meteorological variables.
 
+The following indices are provided:
+
+-        **Z-score**: The Standardized Z-score
+-        **SMAPI**: Soil Moisture Anomaly Percentage Index
+-        **SMDI**: Soil Moisture Deficit Index
+-        **SMDS**: Soil Moisture Drought Severity
+-        **ESSMI**: Empirical Standardized Soil Moisture Index
+-        **SMCI**: Soil Moisture Condition Index
+-        **SMAD**: Standardized Median Absolute Deviation
+-        **SMCA**: Soil Moisture Content Anomaly
+-        **Beta Distribution** 
+-        **Gamma Distribution**
+
      `Germany SM Anomaly Maps July 2021`
 
 
