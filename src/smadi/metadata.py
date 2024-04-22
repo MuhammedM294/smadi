@@ -1,31 +1,3 @@
-from smadi.anomaly_detectors import (
-    ZScore,
-    SMAPI,
-    SMDI,
-    SMCA,
-    SMAD,
-    SMCI,
-    SMDS,
-    ESSMI,
-    ParaDis,
-)
-
-# Supported anomaly detection methods
-_Detectors = {
-    "zscore": ZScore,
-    "smapi-mean": SMAPI,
-    "smapi-median": SMAPI,
-    "smdi": SMDI,
-    "smca-mean": SMCA,
-    "smca-median": SMCA,
-    "smad": SMAD,
-    "smci": SMCI,
-    "smds": SMDS,
-    "essmi": ESSMI,
-    "beta": ParaDis,
-    "gamma": ParaDis,
-}
-
 indicators_thresholds = {
     "zscore": {
         "D-3": (-3, -2),

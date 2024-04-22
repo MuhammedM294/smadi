@@ -1,23 +1,8 @@
 import eomaps
-from smadi.metadata import indicators_thresholds
+import pandas as pd
 
 
-def set_thresholds(method):
-    """
-    Set the thresholds for the specified method based on the method name.
-
-    parameters:
-    -----------
-
-    method: str
-        The method name for which the thresholds are to be set. Supported methods are:
-        'zscore', 'smapi', 'smdi', 'smca', 'smad', 'smci', 'smds', 'essmi', 'beta', 'gamma'
-    """
-
-    if method in indicators_thresholds.keys():
-        return indicators_thresholds[method]
-    else:
-        return None
+from smadi.plot import set_thresholds
 
 
 def set_extent(df, x="lon", y="lat", buffer=2):
@@ -81,7 +66,11 @@ def plot_anomaly_maps(
     x="lon",
     y="lat",
     df_colms=None,
-    crs=4326,
+    map_crs=eomaps.Maps.CRS.Robinson(),
+    # map_crs=eomaps.Maps.CRS.PlateCarree(),
+    # map_crs=eomaps.Maps.CRS.AzimuthalEquidistant(
+    #     central_longitude=10, central_latitude=51
+    # ),
     figure_title="",
     figure_title_kwargs={
         "x": 0.5,
@@ -92,10 +81,13 @@ def plot_anomaly_maps(
         "fontweight": "bold",
     },
     maps_titles=None,
-    maps_titles_kwargs={"pad": 20, "fontsize": 12, "fontweight": "bold"},
+    maps_titles_kwargs={"pad": 13, "fontsize": 12, "fontweight": "bold"},
     add_features=True,
     frame_line_width=1,
+    cb_min_max=["sm_clim", "sm_clim", "abs", "anomaly", "anomaly"],
     cmap="RdYlBu",
+    vmin=None,
+    vmax=None,
     add_gridlines=False,
     cb_kwargs={
         "pos": 0.4,
@@ -103,17 +95,18 @@ def plot_anomaly_maps(
         "tick_lines": "center",
         "show_values": False,
     },
+    cb_label=None,
 ):
-    m = eomaps.Maps(ax=(ax_rows, ax_cols, 1), figsize=figsize)
+    m = eomaps.Maps(ax=(ax_rows, ax_cols, 1), figsize=figsize, crs=map_crs)
     figure_title_kwargs["s"] = figure_title
     m.text(**figure_title_kwargs)
 
-    for i, colm in enumerate(df_colms):
+    for i, (colm, cb_min_max) in enumerate(zip(df_colms, cb_min_max)):
         ax_index = i + 1
         if i == 0:
             m = m
         else:
-            m = m.new_map(ax=(ax_rows, ax_cols, ax_index), figsize=(7, 7))
+            m = m.new_map(ax=(ax_rows, ax_cols, ax_index), figsize=(7, 7), crs=map_crs)
         m.ax.set_title(maps_titles[i], **maps_titles_kwargs)
         m.set_shape.rectangles(radius=0.05)
         if add_features:
@@ -123,7 +116,7 @@ def plot_anomaly_maps(
             m.add_feature.preset.land()
 
         m.set_frame(linewidth=frame_line_width)
-        m.set_data(data=df, parameter=colm, x=x, y=y, crs=crs)
+        m.set_data(data=df, parameter=colm, x=x, y=y, crs=4326)
 
         if add_gridlines:
             g = m.add_gridlines(
@@ -133,40 +126,36 @@ def plot_anomaly_maps(
                 lw=0.01,
             )
             g.add_labels(fontsize=8)
-        clss = set_bins(colm)
-        bins = clss[0] if clss else [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-        labels = (
-            clss[1]
-            if clss
-            else [
-                "0-10",
-                "10-20",
-                "20-30",
-                "30-40",
-                "40-50",
-                "50-60",
-                "60-70",
-                "70-80",
-                "80-90",
-                "90-100",
-            ]
-        )
-        vmin = clss[0][0] if clss else df[colm].min()
-        vmax = clss[0][-1] if clss else df[colm].max()
 
-        m.set_classify.UserDefined(bins=bins)
+        if cb_min_max == "anomaly":
+            bins, labels = set_bins(colm)
+            vmin = bins[0]
+            vmax = bins[-1]
+            m.set_classify.UserDefined(bins=bins)
+
+        if cb_min_max == "sm_clim":
+            vmin = 0
+            vmax = 100
+        if cb_min_max == "abs":
+            vmin = -30 if df[colm].min() > -30 else df[colm].min()
+            vmax = 30 if df[colm].max() < 30 else df[colm].max()
+
+        if cb_min_max == "spi":
+            vmin = -1
+            vmax = 1
 
         if colm.split("(")[0] == "smds":
             cmap = cmap + "_r"
+
         m.plot_map(vmin=vmin, vmax=vmax, cmap=cmap, lw=1.5)
+        label = cb_label[i] if cb_label else colm
         cb = m.add_colorbar(
-            label=False, spacing="uniform", pos=0.4, orientation="vertical"
+            label=label, spacing="uniform", pos=0.4, orientation="vertical"
         )
         cb.set_hist_size(0.8)
         cb.tick_params(rotation=0, labelsize=10, pad=5)
 
-        if clss:
-            bins, labels = clss
+        if cb_min_max == "anomaly":
             cb.set_bin_labels(
                 bins=bins,
                 names=labels,
@@ -175,38 +164,3 @@ def plot_anomaly_maps(
             )
 
     m.show()
-
-
-if __name__ == "__main__":
-    import pandas as pd
-
-    df = pd.read_csv("test1.csv")
-    df.dropna(inplace=True)
-
-    parameters = [
-        "sm-avg(2021-7)",
-        "norm-mean(2021-7)",
-        "abs-mean(2021-7)",
-        "abs-median(2021-7)",
-        "zscore(2021-7)",
-        "smad(2021-7)",
-    ]
-    titles = [
-        "SSM Average ",
-        "Climatology",
-        "Absolute Anomaly- Mean",
-        "Absolute Anomaly- Median",
-        "Z-Score",
-        "SMAD",
-    ]
-    plot_anomaly_maps(
-        figsize=(25, 20),
-        ax_cols=3,
-        ax_rows=2,
-        df=df,
-        df_colms=parameters,
-        figure_title="ASCAT SSM Anomaly Maps for Germany, July 2021",
-        maps_titles=titles,
-        add_gridlines=False,
-        add_features=True,
-    )

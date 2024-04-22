@@ -87,7 +87,7 @@ class TestAggregator:
         df = aggregator.aggregate()
         # Check if aggregation result is a DataFrame
         assert isinstance(df, pd.DataFrame)
-        assert f"{variable}-avg" in df.columns
+        assert f"{variable}-mean" in df.columns
 
     @pytest.mark.skip(reason="Test implemented only for child classes.")
     def test_drop_duplicates(self, aggregator):
@@ -134,7 +134,7 @@ class TestMonthlyAggregator(TestAggregator):
         )
 
         assert daily_obs[variable].mean() == pytest.approx(
-            month_avg[f"{variable}-avg"].iloc[0]
+            month_avg[f"{variable}-mean"].iloc[0]
         )
 
     def test_drop_duplicates(self, aggregator):
@@ -191,7 +191,7 @@ class TestDekadalAggregator(TestAggregator):
         )
 
         assert daily_obs[variable].mean() == pytest.approx(
-            dekadal_avg[f"{variable}-avg"].iloc[0]
+            dekadal_avg[f"{variable}-mean"].iloc[0]
         )
 
     def test_drop_duplicates(self, aggregator):
@@ -246,7 +246,7 @@ class TestWeeklyAggregator(TestAggregator):
         )
 
         assert daily_obs[variable].mean() == pytest.approx(
-            weekly_obs[f"{variable}-avg"].iloc[0]
+            weekly_obs[f"{variable}-mean"].iloc[0]
         )
 
     def test_drop_duplicates(self, aggregator):
@@ -303,7 +303,7 @@ class TestBimonthlyAggregator(TestAggregator):
         )
 
         assert daily_obs[variable].mean() == pytest.approx(
-            bimonthly_obs[f"{variable}-avg"].iloc[0]
+            bimonthly_obs[f"{variable}-mean"].iloc[0]
         )
 
     def test_drop_duplicates(self, aggregator, variable="sm"):
@@ -360,7 +360,7 @@ class TestDailyAggregator(TestAggregator):
         )
 
         assert daily_obs[variable].mean() == pytest.approx(
-            daily_avg[f"{variable}-avg"].iloc[0]
+            daily_avg[f"{variable}-mean"].iloc[0]
         )
 
     def test_aggregate_filter_df(data_sample, aggregator):
@@ -467,7 +467,7 @@ class TestClimatology:
         climatology.time_step = time_steps
         df = climatology.aggregate()
         assert isinstance(df, pd.DataFrame)
-        assert f"{climatology.var}-avg" in df.columns
+        assert f"{climatology.var}-mean" in df.columns
         assert (
             (df == _class(climatology.original_df, climatology.var).aggregate())
             .all()
@@ -511,7 +511,7 @@ class TestClimatology:
             month=month, dekad=dekad, week=week, bimonth=bimonth, day=day
         )
 
-        expected_normal = df[f"{clim_metrics_all.var}-avg"].agg(metric)
+        expected_normal = df[f"{clim_metrics_all.var}-mean"].agg(metric)
         computed_normal = random.choice(df[f"norm-{metric}"])
         assert computed_normal == pytest.approx(expected_normal, rel=1e-4)
 
@@ -563,7 +563,7 @@ class TestClimatology:
             month=month, dekad=dekad, week=week, bimonth=bimonth, day=day
         )
 
-        expected_normal = df[f"{clim_metrics_all.var}-avg"].agg(metric)
+        expected_normal = df[f"{clim_metrics_all.var}-mean"].agg(metric)
         computed_normal = random.choice(df[f"norm-{metric}"])
         assert computed_normal == pytest.approx(expected_normal, rel=1e-4)
 

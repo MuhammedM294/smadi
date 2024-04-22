@@ -2,9 +2,25 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 
-from smadi.anomaly_detectors import *
 from smadi.metadata import indicators_thresholds
-from smadi.map import set_thresholds
+
+
+def set_thresholds(method):
+    """
+    Set the thresholds for the specified method based on the method name.
+
+    parameters:
+    -----------
+
+    method: str
+        The method name for which the thresholds are to be set. Supported methods are:
+        'zscore', 'smapi', 'smdi', 'smca', 'smad', 'smci', 'smds', 'essmi', 'beta', 'gamma'
+    """
+
+    if method in indicators_thresholds.keys():
+        return indicators_thresholds[method]
+    else:
+        return None
 
 
 def get_plot_options(**kwargs):
