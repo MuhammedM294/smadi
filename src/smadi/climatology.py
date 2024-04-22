@@ -2,13 +2,11 @@
 A module for calculating climatology (climate normal) for different time steps (month, dekad, week) based on time series data.
 """
 
-__author__ = "Muhammed Abdelaal"
-__email__ = "muhammedaabdelaal@gmail.com"
-
 from typing import List
 import pandas as pd
+import matplotlib.pyplot as plt
 
-
+from smadi.plot import get_plot_options, plot_colmns, plot_figure
 from smadi.preprocess import (
     fillna,
     smooth,
@@ -47,6 +45,9 @@ class Aggregator:
 
     timespan : list[str, str] optional
         The start and end dates for a timespan to be aggregated. Format: ['YYYY-MM-DD', 'YYYY-MM-DD']
+
+    agg_metric : str
+        The aggregation metric to be used. Supported values: 'mean', 'median', 'min', 'max', 'std', etc.
 
     resulted_df : pd.DataFrame
         The resulting DataFrame after aggregation.
@@ -89,6 +90,7 @@ class Aggregator:
         smoothing=False,
         smooth_window_size=None,
         timespan: List[str] = None,
+        agg_metric: str = "mean",
     ):
         """
         Initializes the Aggregation class.
@@ -101,6 +103,7 @@ class Aggregator:
         self.smoothing = smoothing
         self.smooth_window_size = smooth_window_size
         self.timespan = timespan
+        self.agg_metric = agg_metric
         self._validate_input()
         self.resulted_df = pd.DataFrame()
 
@@ -233,6 +236,7 @@ class MonthlyAggregator(Aggregator):
         smoothing=False,
         smooth_window_size=None,
         timespan: List[str] = None,
+        agg_metric: str = "mean",
     ):
         super().__init__(
             df,
@@ -242,11 +246,14 @@ class MonthlyAggregator(Aggregator):
             smoothing,
             smooth_window_size,
             timespan,
+            agg_metric,
         )
 
     def aggregate(self, **kwargs):
 
-        self.resulted_df[f"{self.var}-avg"] = monthly_agg(self.df, self.var)
+        self.resulted_df[f"{self.var}-{self.agg_metric}"] = monthly_agg(
+            self.df, self.var, self.agg_metric
+        )
 
         return filter_df(self.resulted_df, **kwargs)
 
@@ -265,6 +272,7 @@ class DekadalAggregator(Aggregator):
         smoothing=False,
         smooth_window_size=None,
         timespan: List[str] = None,
+        agg_metric: str = "mean",
     ):
 
         super().__init__(
@@ -275,11 +283,14 @@ class DekadalAggregator(Aggregator):
             smoothing,
             smooth_window_size,
             timespan,
+            agg_metric,
         )
 
     def aggregate(self, **kwargs):
 
-        self.resulted_df[f"{self.var}-avg"] = dekadal_agg(self.df, self.var)
+        self.resulted_df[f"{self.var}-{self.agg_metric}"] = dekadal_agg(
+            self.df, self.var
+        )
 
         return filter_df(self.resulted_df, **kwargs)
 
@@ -298,6 +309,7 @@ class WeeklyAggregator(Aggregator):
         smoothing=False,
         smooth_window_size=None,
         timespan: List[str] = None,
+        agg_metric: str = "mean",
     ):
         super().__init__(
             df,
@@ -307,11 +319,14 @@ class WeeklyAggregator(Aggregator):
             smoothing,
             smooth_window_size,
             timespan,
+            agg_metric,
         )
 
     def aggregate(self, **kwargs):
 
-        self.resulted_df[f"{self.var}-avg"] = weekly_agg(self.df, self.var)
+        self.resulted_df[f"{self.var}-{self.agg_metric}"] = weekly_agg(
+            self.df, self.var
+        )
 
         return filter_df(self.resulted_df, **kwargs)
 
@@ -330,6 +345,7 @@ class BimonthlyAggregator(Aggregator):
         smoothing=False,
         smooth_window_size=None,
         timespan: List[str] = None,
+        agg_metric: str = "mean",
     ):
         super().__init__(
             df,
@@ -339,11 +355,14 @@ class BimonthlyAggregator(Aggregator):
             smoothing,
             smooth_window_size,
             timespan,
+            agg_metric,
         )
 
     def aggregate(self, **kwargs):
 
-        self.resulted_df[f"{self.var}-avg"] = bimonthly_agg(self.df, self.var)
+        self.resulted_df[f"{self.var}-{self.agg_metric}"] = bimonthly_agg(
+            self.df, self.var
+        )
 
         return filter_df(self.resulted_df, **kwargs)
 
@@ -362,6 +381,7 @@ class DailyAggregator(Aggregator):
         smoothing=False,
         smooth_window_size=None,
         timespan: List[str] = None,
+        agg_metric: str = "mean",
     ):
 
         super().__init__(
@@ -372,10 +392,11 @@ class DailyAggregator(Aggregator):
             smoothing,
             smooth_window_size,
             timespan,
+            agg_metric,
         )
 
     def aggregate(self, **kwargs):
-        self.resulted_df[f"{self.var}-avg"] = self.df[self.var]
+        self.resulted_df[f"{self.var}-{self.agg_metric}"] = self.df[self.var]
         return filter_df(self.resulted_df.drop_duplicates(), **kwargs)
 
 
@@ -412,6 +433,9 @@ class Climatology(Aggregator):
     time_step: str
         The time step for aggregation. Supported values: 'day', 'week', 'dekad', 'bimonth', 'month'.
 
+    agg_metric: str
+        The aggregation metric to be used. Supported values: 'mean', 'median', 'min', 'max', 'std', etc.
+
     normal_metrics: List[str]
         The metrics to be used in the climatology computation. Supported values: 'mean', 'median', 'min', 'max', etc.
 
@@ -444,6 +468,7 @@ class Climatology(Aggregator):
         timespan: List[str] = None,
         time_step: str = "month",
         normal_metrics: List[str] = ["mean"],
+        agg_metric: str = "mean",
     ):
         """
         Initializes the Climatology class.
@@ -460,6 +485,7 @@ class Climatology(Aggregator):
             smoothing,
             smooth_window_size,
             timespan,
+            agg_metric,
         )
         self.clim_df = pd.DataFrame()
 
@@ -505,60 +531,30 @@ class Climatology(Aggregator):
         Aggregates the data based on the time step and metrics provided.
 
         """
+        params = {
+            "df": self.df,
+            "variable": self.var,
+            "fillna": self.fillna,
+            "fillna_window_size": self.fillna_window_size,
+            "smoothing": self.smoothing,
+            "smooth_window_size": self.smooth_window_size,
+            "timespan": self.timespan,
+            "agg_metric": self.agg_metric,
+        }
         if self.time_step == "month":
-            return MonthlyAggregator(
-                self.df,
-                self.var,
-                self.fillna,
-                self.fillna_window_size,
-                self.smoothing,
-                self.smooth_window_size,
-                self.timespan,
-            ).aggregate()
+            return MonthlyAggregator(**params).aggregate()
 
         elif self.time_step == "week":
-            return WeeklyAggregator(
-                self.df,
-                self.var,
-                self.fillna,
-                self.fillna_window_size,
-                self.smoothing,
-                self.smooth_window_size,
-                self.timespan,
-            ).aggregate()
+            return WeeklyAggregator(**params).aggregate()
 
         elif self.time_step == "dekad":
-            return DekadalAggregator(
-                self.df,
-                self.var,
-                self.fillna,
-                self.fillna_window_size,
-                self.smoothing,
-                self.smooth_window_size,
-                self.timespan,
-            ).aggregate()
+            return DekadalAggregator(**params).aggregate()
 
         elif self.time_step == "bimonth":
-            return BimonthlyAggregator(
-                self.df,
-                self.var,
-                self.fillna,
-                self.fillna_window_size,
-                self.smoothing,
-                self.smooth_window_size,
-                self.timespan,
-            ).aggregate()
+            return BimonthlyAggregator(**params).aggregate()
 
         elif self.time_step == "day":
-            return DailyAggregator(
-                self.df,
-                self.var,
-                self.fillna,
-                self.fillna_window_size,
-                self.smoothing,
-                self.smooth_window_size,
-                self.timespan,
-            ).aggregate()
+            return DailyAggregator(**params).aggregate()
 
     def compute_normals(self, **kwargs) -> pd.DataFrame:
         """
@@ -574,8 +570,83 @@ class Climatology(Aggregator):
         pd.DataFrame
             The DataFrame containing climatology information.
         """
+
         self.clim_df = compute_clim(
-            self.aggregate(), self.time_step, f"{self.var}-avg", self.normal_metrics
+            self.aggregate(),
+            self.time_step,
+            f"{self.var}-{self.agg_metric}",
+            self.normal_metrics,
         )
 
         return filter_df(self.clim_df, **kwargs)
+
+    def plot_ts(
+        self,
+        df=None,
+        x_axis=None,
+        colmns_kwargs=None,
+        plot_raw=False,
+        raw_resample="D",
+        raw_kwargs=None,
+        plot_style="ggplot",
+        **kwargs,
+    ):
+        """
+        Plot the time series data for the provided dataframe.
+
+        parameters:
+        -----------
+
+        df: pd.DataFrame
+            The dataframe containing the data to plot. or None if the climatology object is used.
+
+        x_axis: list
+            The x-axis values for the plot. or None if the climatology object is used.
+
+        colmns_kwargs: dict
+            The dictionary containing the column names and their respective matplotlib plot options.
+
+        plot_raw: bool
+            Whether to plot the raw data on the plot as background.
+
+        raw_resample: str
+            The resample frequency for the raw data. Supported values: 'D', 'W', 'M', etc.
+
+        raw_kwargs: dict
+            The dictionary containing the matplotlib plot options for the raw data.
+
+        kwargs: dict
+            The keyword arguments for the matplotlib plot for the figure such as title, xlabel, ylabel, legend, figsize, and grid.
+
+        """
+        # Set values for kwargs based on provided values
+        plt.style.use(plot_style)
+        df = self.compute_normals() if df is None else df
+        x_axis = df.index if x_axis is None else x_axis
+        colmns_kwargs = (
+            {
+                f"{self.var}-{self.agg_metric}": {
+                    "label": f"{self.var}-{self.agg_metric}"
+                }
+            }
+            if colmns_kwargs is None
+            else colmns_kwargs
+        )
+        plot_params = get_plot_options(**kwargs)
+        if plot_params["figsize"] is not None:
+            plt.figure(figsize=plot_params["figsize"])
+
+        if plot_raw:
+            raw_df = (
+                self.original_df.resample(raw_resample).mean()
+                if raw_resample
+                else self.original_df
+            )
+            plt.plot(
+                raw_df.index,
+                raw_df[f"{self.var}"],
+                **raw_kwargs if raw_kwargs else {"alpha": 0.5, "label": "Raw Data"},
+            )
+
+        plot_colmns(df, x_axis, colmns_kwargs)
+        plot_figure(plot_params)
