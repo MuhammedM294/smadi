@@ -145,7 +145,7 @@ def filter_df(
     return df
 
 
-def monthly_agg(df: pd.DataFrame, variable: str) -> pd.DataFrame:
+def monthly_agg(df: pd.DataFrame, variable: str, agg_metric="mean") -> pd.DataFrame:
     """
     Aggregates the time series data based on month-based time step.
 
@@ -157,19 +157,18 @@ def monthly_agg(df: pd.DataFrame, variable: str) -> pd.DataFrame:
     variable: str
         The variable/column in the DataFrame to be aggregated.
 
+    agg_metric: str
+        The aggregation metric to be used. Supported values: 'mean', 'median', 'min', 'max', etc.
+
     Returns:
     --------
     pd.DataFrame
         The DataFrame containing the aggregated data.
     """
-    return (
-        df.groupby([df.index.year, df.index.month])[variable]
-        .transform("mean")
-        .drop_duplicates()
-    )
+    return df.resample("ME")[variable].agg(agg_metric)
 
 
-def dekadal_agg(df: pd.DataFrame, variable: str) -> pd.DataFrame:
+def dekadal_agg(df: pd.DataFrame, variable: str, agg_metric="mean") -> pd.DataFrame:
     """
     Aggregates the time series data based on dekad-based time step.
 
@@ -181,6 +180,9 @@ def dekadal_agg(df: pd.DataFrame, variable: str) -> pd.DataFrame:
     variable: str
         The variable/column in the DataFrame to be aggregated.
 
+    agg_metric: str
+        The aggregation metric to be used. Supported values: 'mean', 'median', 'min', 'max', etc.
+
     Returns:
     --------
     pd.DataFrame
@@ -189,12 +191,12 @@ def dekadal_agg(df: pd.DataFrame, variable: str) -> pd.DataFrame:
     df["dekad"] = df.index.map(lambda x: 1 if x.day <= 10 else 2 if x.day <= 20 else 3)
     return (
         df.groupby([df.index.year, df.index.month, "dekad"])[variable]
-        .transform("mean")
+        .transform(agg_metric)
         .drop_duplicates()
     )
 
 
-def weekly_agg(df: pd.DataFrame, variable: str) -> pd.DataFrame:
+def weekly_agg(df: pd.DataFrame, variable: str, agg_metric="mean") -> pd.DataFrame:
     """
     Aggregates the time series data based on week-based time step.
 
@@ -206,6 +208,9 @@ def weekly_agg(df: pd.DataFrame, variable: str) -> pd.DataFrame:
     variable: str
         The variable/column in the DataFrame to be aggregated.
 
+    agg_metric: str
+        The aggregation metric to be used. Supported values: 'mean', 'median', 'min', 'max', etc.
+
     Returns:
     --------
     pd.DataFrame
@@ -213,12 +218,12 @@ def weekly_agg(df: pd.DataFrame, variable: str) -> pd.DataFrame:
     """
     return (
         df.groupby([df.index.year, df.index.isocalendar().week])[variable]
-        .transform("mean")
+        .transform(agg_metric)
         .drop_duplicates()
     )
 
 
-def bimonthly_agg(df: pd.DataFrame, variable: str) -> pd.DataFrame:
+def bimonthly_agg(df: pd.DataFrame, variable: str, agg_metric="mean") -> pd.DataFrame:
     """
     Aggregates the time series data based on bimonth-based time step.
 
@@ -230,6 +235,9 @@ def bimonthly_agg(df: pd.DataFrame, variable: str) -> pd.DataFrame:
     variable: str
         The variable/column in the DataFrame to be aggregated.
 
+    agg_metric: str
+        The aggregation metric to be used. Supported values: 'mean', 'median', 'min', 'max', etc.
+
     Returns:
     --------
     pd.DataFrame
@@ -239,7 +247,7 @@ def bimonthly_agg(df: pd.DataFrame, variable: str) -> pd.DataFrame:
         df["bimonth"] = df.index.map(lambda x: 1 if x.day <= 15 else 2)
     return (
         df.groupby([df.index.year, df.index.month, df["bimonth"]])[variable]
-        .transform("mean")
+        .transform(agg_metric)
         .drop_duplicates()
     )
 
