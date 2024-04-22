@@ -2,6 +2,7 @@ import numpy as np
 from scipy.stats import gaussian_kde
 from scipy.stats import norm, beta, gamma
 from scipy.stats import percentileofscore
+from standard_precip.spi import SPI
 
 
 def zscore(obs, mean=None, std=None):
@@ -270,7 +271,12 @@ def para_dis(obs, dist="beta"):
         The observed time series data.
 
     dist: str, optional
-        The distribution to fit the observed data to. Supported values: 'beta', 'gamma'
+        The distribution to fit the observed data to. Supported values: 'beta','gamma', 'gam', 'exp', 'pe3'
+        gam: Gamma
+        exp: Exponential
+        pe3: Pearson III
+
+
     """
 
     obs = np.asarray(obs)
@@ -278,11 +284,18 @@ def para_dis(obs, dist="beta"):
     if dist == "beta":
         a, b, loc, scale = beta.fit(obs)
         fitted = beta(a, b, loc, scale)
+        cdf = fitted.cdf(obs)
+
+        return norm.ppf(cdf)
 
     elif dist == "gamma":
         shape, loc, scale = gamma.fit(obs)
         fitted = gamma(shape, loc, scale)
+        cdf = fitted.cdf(obs)
+        return norm.ppf(cdf)
 
-    cdf = fitted.cdf(obs)
+    else:
+        param_dis = SPI()
+        params, p_zero = param_dis.fit_distribution(obs, dist, "lmom")
 
-    return norm.ppf(cdf)
+        return param_dis.cdf_to_ppf(obs, params, p_zero)
