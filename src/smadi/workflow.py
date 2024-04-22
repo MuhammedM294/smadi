@@ -3,9 +3,6 @@ run_workflow.py - SMADI Workflow Execution
 
 """
 
-__author__ = "Muhammed Abdelaal"
-__email__ = "muhammedaabdelaal@gmail.com"
-
 from argparse import ArgumentParser, Namespace, ArgumentError
 from typing import List, Tuple, Union, Dict
 from concurrent.futures import ProcessPoolExecutor
@@ -14,8 +11,7 @@ import pandas as pd
 import numpy as np
 
 
-from smadi.metadata import _Detectors
-from smadi.data_reader import AscatData
+from smadi.data_reader import AscatData, read_era5
 from smadi.utils import (
     create_logger,
     log_exception,
@@ -23,6 +19,33 @@ from smadi.utils import (
     load_gpis_by_country,
     get_gpis_from_bbox,
 )
+from smadi.anomaly_detectors import (
+    ZScore,
+    SMAPI,
+    SMDI,
+    SMCA,
+    SMAD,
+    SMCI,
+    SMDS,
+    ESSMI,
+    ParaDis,
+)
+
+# Supported anomaly detection methods
+_Detectors = {
+    "zscore": ZScore,
+    "smapi-mean": SMAPI,
+    "smapi-median": SMAPI,
+    "smdi": SMDI,
+    "smca-mean": SMCA,
+    "smca-median": SMCA,
+    "smad": SMAD,
+    "smci": SMCI,
+    "smds": SMDS,
+    "essmi": ESSMI,
+    "beta": ParaDis,
+    "gamma": ParaDis,
+}
 
 
 def setup_argument_parser() -> ArgumentParser:
@@ -391,6 +414,7 @@ def addi_retrival(
     anomaly: pd.DataFrame = None,
     variable: str = None,
     date_str: str = None,
+    agg_metric: str = "mean",
 ):
     """
     Validate and retrieve additional parameters from the anomaly dataframe.
@@ -404,8 +428,8 @@ def addi_retrival(
         #     )
 
         if "var" in addi_retrive:
-            results[f"{variable}-avg" + f"({date_str})"] = anomaly[
-                f"{variable}-avg"
+            results[f"{variable}-{agg_metric}" + f"({date_str})"] = anomaly[
+                f"{variable}-{agg_metric}"
             ].values
         if "norm" in addi_retrive:
             if "norm-mean" in anomaly.columns:
@@ -416,11 +440,13 @@ def addi_retrival(
         if "abs" in addi_retrive:
             if "norm-mean" in anomaly.columns:
                 results["abs-mean" + f"({date_str})"] = (
-                    anomaly[f"{variable}-avg"].values - anomaly["norm-mean"].values
+                    anomaly[f"{variable}-{agg_metric}"].values
+                    - anomaly["norm-mean"].values
                 )
             if "norm-median" in anomaly.columns:
                 results["abs-median" + f"({date_str})"] = (
-                    anomaly[f"{variable}-avg"].values - anomaly["norm-median"].values
+                    anomaly[f"{variable}-{agg_metric}"].values
+                    - anomaly["norm-median"].values
                 )
 
     return results
@@ -444,6 +470,9 @@ def single_po_run(
     day: Union[int, List[int]] = None,
     timespan: List[str] = None,
     addi_retrive: list = ["var", "norm"],
+    agg_metric: list = "mean",
+    mode: str = "anomaly",
+    era5_path: str = None,
 ) -> Tuple[int, Dict[str, float]]:
     """
     Run the anomaly detection workflow for a single grid point index.
@@ -475,6 +504,7 @@ def single_po_run(
             "smoothing": smoothing,
             "smooth_window_size": smooth_window_size,
             "timespan": timespan,
+            "agg_metric": agg_metric,
         }
 
         # If the method has a metric parameter (e.g. smapi-mean, smapi-median), set the metric parameter
@@ -489,6 +519,8 @@ def single_po_run(
                 anomaly = _Detectors[method](**anomaly_params).detect_anomaly(
                     **date_param
                 )
+
+                # if mode == "anomaly":
                 date_str = f"-".join(str(value) for value in date_param.values())
                 results[method + f"({date_str})"] = anomaly[method].values
 
@@ -498,7 +530,10 @@ def single_po_run(
                     anomaly=anomaly,
                     variable=variable,
                     date_str=date_str,
+                    agg_metric=agg_metric,
                 )
+                # elif mode == "spi":
+                #     era5_df = read_era5(era5_path, loc=(lon, lat))
 
         except AttributeError as e:
             return None
