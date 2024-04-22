@@ -5,8 +5,11 @@ from time import time
 from io import StringIO
 import pycountry
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from fibgrid.realization import FibLandGrid
+
+from smadi.metadata import indicators_thresholds
 
 
 def create_logger(name, level=logging.DEBUG):
