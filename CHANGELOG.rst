@@ -2,9 +2,12 @@
 Changelog
 =========
 
-Version 0.1
+Version 1.0.0, 2024-04-23
 ===========
 
-- Feature A added
-- FIX: nasty bug #1729 fixed
-- add your changes here!
+- Reader for netCDF H129 HSAF  and ERA5-Land product
+- Compute climatology at different time scales
+- Compute anomalies using 10 different methods
+- Plotting functions for time series, climatology and anomalies
+- Mapping functions for time series, climatology and anomalies
+
