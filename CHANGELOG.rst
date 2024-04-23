@@ -3,7 +3,7 @@ Changelog
 =========
 
 Version 1.0.0, 2024-04-23
-===========
+=========================
 
 - Reader for netCDF H129 HSAF  and ERA5-Land product
 - Compute climatology at different time scales
