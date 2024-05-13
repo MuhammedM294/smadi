@@ -397,7 +397,7 @@ class DailyAggregator(Aggregator):
 
     def aggregate(self, **kwargs):
         self.resulted_df[f"{self.var}-{self.agg_metric}"] = self.df[self.var]
-        return filter_df(self.resulted_df.drop_duplicates(), **kwargs)
+        return filter_df(self.resulted_df, **kwargs)
 
 
 class Climatology(Aggregator):
