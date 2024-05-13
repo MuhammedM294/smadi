@@ -12,7 +12,7 @@ from setuptools import setup
 if __name__ == "__main__":
     try:
         setup(
-            version="0.5.0",
+            version="1.0.1",
             entry_points={
                 "console_scripts": [
                     "run = smadi.workflow:main",
