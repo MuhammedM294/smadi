@@ -9,9 +9,11 @@ from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
 
 
 from smadi.data_reader import AscatData, read_era5
+from smadi.preprocess import filter_df
 from smadi.utils import (
     create_logger,
     log_exception,
@@ -238,6 +240,10 @@ def parse_arguments(parser):
 
 # Create a logger
 logger = create_logger("workflow-logger")
+parser = setup_argument_parser()
+args = parse_arguments(parser)
+global ascat_obj
+ascat_obj = AscatData(args["data_path"], args["data_read_bulk"])
 
 
 @log_exception(logger)
@@ -422,11 +428,6 @@ def addi_retrival(
 
     if addi_retrive is not None:
 
-        # if not all(value in ["var", "norm"] for value in addi_retrive):
-        #     raise ValueError(
-        #         "The additional retrieval parameters must be one of the following: 'var', 'norm'"
-        #     )
-
         if "var" in addi_retrive:
             results[f"{variable}-{agg_metric}" + f"({date_str})"] = anomaly[
                 f"{variable}-{agg_metric}"
@@ -471,8 +472,6 @@ def single_po_run(
     timespan: List[str] = None,
     addi_retrive: list = ["var", "norm"],
     agg_metric: list = "mean",
-    mode: str = "anomaly",
-    era5_path: str = None,
 ) -> Tuple[int, Dict[str, float]]:
     """
     Run the anomaly detection workflow for a single grid point index.
@@ -515,25 +514,21 @@ def single_po_run(
             anomaly_params["dist"] = [method]
 
         try:
-            for date_param in date_params:
-                anomaly = _Detectors[method](**anomaly_params).detect_anomaly(
-                    **date_param
-                )
 
-                # if mode == "anomaly":
+            anomaly = _Detectors[method](**anomaly_params).detect_anomaly()
+            for date_param in date_params:
+                anomaly_df = filter_df(anomaly, **date_param)
                 date_str = f"-".join(str(value) for value in date_param.values())
-                results[method + f"({date_str})"] = anomaly[method].values
+                results[method + f"({date_str})"] = anomaly_df[method].values
 
                 results = addi_retrival(
                     addi_retrive=addi_retrive,
                     results=results,
-                    anomaly=anomaly,
+                    anomaly=anomaly_df,
                     variable=variable,
                     date_str=date_str,
                     agg_metric=agg_metric,
                 )
-                # elif mode == "spi":
-                #     era5_df = read_era5(era5_path, loc=(lon, lat))
 
         except AttributeError as e:
             return None
@@ -586,6 +581,9 @@ def run(
     else:
         pointlist = get_gpis_from_bbox(aoi)
 
+    pointlist = pointlist.drop(2933)
+    pointlist = pointlist.drop(3210)
+    pointlist = pointlist.drop(812)
     logger.info(f"Grid points loaded successfully for {aoi}\n")
     logger.info(f"\n\n{pointlist.head()}")
     pre_compute = partial(
@@ -628,7 +626,10 @@ def run(
             logger.info(f"     {param}: {value}")
 
     with ProcessPoolExecutor(workers) as executor:
-        results = executor.map(pre_compute, pointlist["point"])
+        results = list(
+            tqdm(executor.map(pre_compute, pointlist["point"]), total=len(pointlist))
+        )
+        # results = executor.map(pre_compute, pointlist["point"])
         for result in results:
             pointlist = _finalize(result, pointlist)
 
@@ -636,13 +637,6 @@ def run(
 
 
 def main():
-
-    parser = setup_argument_parser()
-    args = parse_arguments(parser)
-
-    # Create an instance of the AscatData class
-    global ascat_obj
-    ascat_obj = AscatData(args["data_path"], args["data_read_bulk"])
 
     try:
         validate_anomaly_method(args["methods"])
