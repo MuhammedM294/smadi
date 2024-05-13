@@ -1,6 +1,6 @@
 import eomaps
 import pandas as pd
-
+from tqdm import tqdm
 
 from smadi.plot import set_thresholds
 
@@ -81,9 +81,10 @@ def plot_anomaly_maps(
         "fontweight": "bold",
     },
     maps_titles=None,
-    maps_titles_kwargs={"pad": 13, "fontsize": 12, "fontweight": "bold"},
+    maps_titles_kwargs={"pad": 11, "fontsize": 10, "fontweight": "bold"},
     add_features=True,
     frame_line_width=1,
+    add_cb=True,
     cb_min_max=["sm_clim", "sm_clim", "abs", "anomaly", "anomaly"],
     cmap="RdYlBu",
     vmin=None,
@@ -96,18 +97,28 @@ def plot_anomaly_maps(
         "show_values": False,
     },
     cb_label=None,
+    save_to=None,
 ):
     m = eomaps.Maps(ax=(ax_rows, ax_cols, 1), figsize=figsize, crs=map_crs)
     figure_title_kwargs["s"] = figure_title
     m.text(**figure_title_kwargs)
 
-    for i, (colm, cb_min_max) in enumerate(zip(df_colms, cb_min_max)):
+    total_iterations = len(df_colms)
+
+    for i, (colm, cb_min_max) in tqdm(
+        enumerate(zip(df_colms, cb_min_max)),
+        total=total_iterations,
+        desc="Processing maps",
+    ):
         ax_index = i + 1
         if i == 0:
             m = m
         else:
             m = m.new_map(ax=(ax_rows, ax_cols, ax_index), figsize=(7, 7), crs=map_crs)
-        m.ax.set_title(maps_titles[i], **maps_titles_kwargs)
+
+        if maps_titles:
+            m.ax.set_title(maps_titles[i], **maps_titles_kwargs)
+
         m.set_shape.rectangles(radius=0.05)
         if add_features:
             m.add_feature.preset.coastline(lw=0.6)
@@ -148,19 +159,27 @@ def plot_anomaly_maps(
             cmap = cmap + "_r"
 
         m.plot_map(vmin=vmin, vmax=vmax, cmap=cmap, lw=1.5)
-        label = cb_label[i] if cb_label else colm
-        cb = m.add_colorbar(
-            label=label, spacing="uniform", pos=0.4, orientation="vertical"
-        )
-        cb.set_hist_size(0.8)
-        cb.tick_params(rotation=0, labelsize=10, pad=5)
 
-        if cb_min_max == "anomaly":
-            cb.set_bin_labels(
-                bins=bins,
-                names=labels,
-                tick_lines=cb_kwargs["tick_lines"],
-                show_values=cb_kwargs["show_values"],
+        if add_cb:
+            label = cb_label[i] if cb_label else None
+            cb = m.add_colorbar(
+                label=label,
+                spacing="uniform",
+                pos=0.4,
+                orientation="vertical",
+                hist_bins=256,
             )
+            cb.set_hist_size(0.8)
+            cb.tick_params(rotation=0, labelsize=10, pad=5)
+
+            if cb_min_max == "anomaly":
+                cb.set_bin_labels(
+                    bins=bins,
+                    names=labels,
+                    tick_lines=cb_kwargs["tick_lines"],
+                    show_values=cb_kwargs["show_values"],
+                )
 
     m.show()
+    if save_to:
+        m.savefig(save_to)
