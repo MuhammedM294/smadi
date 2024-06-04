@@ -7,7 +7,7 @@ from typing import List
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from smadi.plot import get_plot_options, plot_colmns, plot_figure
+from smadi.plot import plot_ts
 from smadi.preprocess import (
     fillna,
     smooth,
@@ -20,44 +20,40 @@ from smadi.preprocess import (
 )
 
 
-class Aggregator(ABC):
+class Preprocessor:
     """
-    Abstract base class for aggregation
+    A class for preprocessing the time series data before aggregation.
 
     Attributes:
     -----------
-    df : pd.DataFrame
-        The DataFrame containing the data to be aggregated.
 
-    variable : str
+    df: pd.DataFrame
+        The input DataFrame containing the time series data to be aggregated.
+
+    variable: str
         The variable/column in the DataFrame to be aggregated.
 
-    fillna : bool
+    fillna: bool
         Fill NaN values in the time series data using a moving window average.
 
-    fillna_window_size : int
+    fillna_window_size: int
         The size of the moving window for filling NaN values. It is recommended to be an odd number.
 
-    smoothing : bool
+    smoothing: bool
         Smooth the time series data using a moving window average.
 
-    smooth_window_size : int
+    smooth_window_size: int
         The size of the moving window for smoothing(n-days). It is recommended to be an odd number.
 
-    timespan : list[str, str] optional
-        The start and end dates for a timespan to be aggregated. Format: ['YYYY-MM-DD', 'YYYY-MM-DD']
-
-    agg_metric : str
-        The aggregation metric to be used. Supported values: 'mean', 'median', 'min', 'max', 'std', etc.
-
-    resulted_df : pd.DataFrame
-        The resulting DataFrame after aggregation.
+    timespan: list[str, str] optional
+        The start and end dates for a timespan to be aggregated. Format: ['YYYY-MM-DD ]
 
     Methods:
     --------
 
-    aggregate:
-        Aggregates the data based on the specified time step.
+    preprocess:
+
+        Preprocess the time series data by resampling, truncating, filling NaN values, and smoothing.
 
     """
 
@@ -67,15 +63,92 @@ class Aggregator(ABC):
         variable: str,
         fillna: bool = False,
         fillna_window_size: int = None,
-        smoothing=False,
-        smooth_window_size=None,
+        smoothing: bool = False,
+        smooth_window_size: int = None,
+        timespan: List[str] = None,
+    ):
+        self.df = df
+        self.variable = variable
+        self.fillna = fillna
+        self.fillna_window_size = fillna_window_size
+        self.smoothing = smoothing
+        self.smooth_window_size = smooth_window_size
+        self.timespan = timespan
+
+    def preprocess(self):
+        resampled_df = self._resample(self.df)
+        truncated_df = self._truncate(resampled_df)
+        filled_df = self._fillna(truncated_df)
+        smoothed_df = self._smooth(filled_df)
+        smoothed_df.dropna(inplace=True)
+        return smoothed_df
+
+    def _resample(self, df):
+        return pd.DataFrame(df[self.variable]).resample("D").mean()
+
+    def _truncate(self, df):
+        if self.timespan:
+            return df.truncate(before=self.timespan[0], after=self.timespan[1])
+        return df
+
+    def _fillna(self, df):
+        if self.fillna:
+            df[self.variable] = fillna(df, self.variable, self.fillna_window_size)
+        return df
+
+    def _smooth(self, df):
+        if self.smoothing:
+            df[self.variable] = smooth(df, self.variable, self.smooth_window_size)
+        return df
+
+
+class Aggregator(ABC):
+    """
+    An abstract class for aggregating time series data based on different time steps.
+
+    Attributes:
+
+    df: pd.DataFrame
+        The input DataFrame containing the time series data to be aggregated.
+
+    variable: str
+        The variable/column in the DataFrame to be aggregated.
+
+    fillna: bool
+        Fill NaN values in the time series data using a moving window average.
+
+    fillna_window_size: int
+
+    smoothing: bool
+        Smooth the time series data using a moving window average.
+
+    smooth_window_size: int
+        The size of the moving window for smoothing(n-days). It is recommended to be an odd number.
+
+    timespan: list[str, str] optional
+        The start and end dates for a timespan to be aggregated. Format: ['YYYY-MM-DD ]
+
+    agg_metric: str
+        The aggregation metric to be used. Supported values: 'mean', 'median', 'min', 'max', 'std', etc.
+
+    Methods:
+    --------
+
+    aggregate:
+        Aggregates the time series data based on the provided time step.
+    """
+
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        variable: str,
+        fillna: bool = False,
+        fillna_window_size: int = None,
+        smoothing: bool = False,
+        smooth_window_size: int = None,
         timespan: List[str] = None,
         agg_metric: str = "mean",
     ):
-        """
-        Initializes the Aggregation class.
-
-        """
         self.original_df = df
         self.var = variable
         self.fillna = fillna
@@ -84,115 +157,25 @@ class Aggregator(ABC):
         self.smooth_window_size = smooth_window_size
         self.timespan = timespan
         self.agg_metric = agg_metric
-        self._validate_input()
+
+        self.preprocessor = Preprocessor(
+            df,
+            variable,
+            fillna,
+            fillna_window_size,
+            smoothing,
+            smooth_window_size,
+            timespan,
+        )
         self.resulted_df = pd.DataFrame()
 
     @abstractmethod
     def aggregate(self, **kwargs):
-        """
-        Aggregates the data based on the specified .
-        """
-        return filter_df(self.preprocess_df, **kwargs)
+        pass
 
     @property
     def preprocess_df(self):
-        """
-        Preprocess the DataFrame for aggregation.
-        """
-        # Validate the input parameters
-        self._validate_input()
-
-        # Resample the data to daily frequency
-        resampled_df = self._resample(self.original_df)
-
-        # Truncate the data based on the timespan provided
-
-        truncated_df = self._truncate(resampled_df)
-
-        filled_df = self._fillna(truncated_df)
-        smoothed_df = self._smooth(filled_df)
-        smoothed_df.dropna(inplace=True)
-
-        return smoothed_df
-
-    def _resample(self, df):
-        """
-        Resample the data to daily frequency.
-
-        """
-        return pd.DataFrame(df[self.var]).resample("D").mean()
-
-    def _truncate(self, df):
-        """
-        Truncate the data based on the timespan provided.
-        """
-        if self.timespan:
-            return df.truncate(before=self.timespan[0], after=self.timespan[1])
-        return df
-
-    def _fillna(self, df):
-        """
-        Fills NaN values in the time series data using a moving window average.
-        """
-        if self.fillna:
-            df[self.var] = fillna(df, self.var, self.fillna_window_size)
-
-        return df
-
-    def _smooth(self, df):
-        """
-        Smooths the time series data using a moving window average.
-        """
-        if self.smoothing:
-            df[self.var] = smooth(df, self.var, self.smooth_window_size)
-
-        return df
-
-    def _validate_df_index(self):
-        """
-        Validates the input DataFrame type and index.
-
-        """
-        if not isinstance(self.original_df, pd.DataFrame):
-            raise TypeError("df must be a pandas DataFrame")
-
-        if not isinstance(self.original_df.index, pd.DatetimeIndex):
-            raise ValueError("df index must be a datetime index")
-
-    def _validate_variable(self):
-        """
-        Validates the variable to be aggregated.
-
-        """
-        if self.var not in self.original_df.columns:
-            raise ValueError(
-                f"Variable '{self.var}' not found in the input DataFrame columns."
-            )
-
-    def _validate_fillna_smoothing(self):
-        """
-        Validates the smoothing parameters.
-
-        """
-
-        if any(
-            [
-                self.fillna and self.fillna_window_size is None,
-                self.smoothing and self.smooth_window_size is None,
-            ]
-        ):
-
-            raise ValueError(
-                "window size must be provided when 'fillna' or 'smoothing' is enabled"
-            )
-
-    def _validate_input(self):
-        """
-        Validates the input parameters.
-        """
-        self._validate_df_index()
-        self._validate_variable()
-        self._validate_fillna_smoothing()
+        return self.preprocessor.preprocess()
 
 
 class MonthlyAggregator(Aggregator):
@@ -217,7 +200,7 @@ class DekadalAggregator(Aggregator):
     def aggregate(self, **kwargs):
 
         self.resulted_df[f"{self.var}-{self.agg_metric}"] = dekadal_agg(
-            self.preprocess_df, self.var
+            self.preprocess_df, self.var, self.agg_metric
         )
 
         return filter_df(self.resulted_df, **kwargs)
@@ -231,7 +214,7 @@ class WeeklyAggregator(Aggregator):
     def aggregate(self, **kwargs):
 
         self.resulted_df[f"{self.var}-{self.agg_metric}"] = weekly_agg(
-            self.preprocess_df, self.var
+            self.preprocess_df, self.var, self.agg_metric
         )
 
         return filter_df(self.resulted_df, **kwargs)
@@ -245,7 +228,7 @@ class BimonthlyAggregator(Aggregator):
     def aggregate(self, **kwargs):
 
         self.resulted_df[f"{self.var}-{self.agg_metric}"] = bimonthly_agg(
-            self.preprocess_df, self.var
+            self.preprocess_df, self.var, self.agg_metric
         )
 
         return filter_df(self.resulted_df, **kwargs)
@@ -259,6 +242,102 @@ class DailyAggregator(Aggregator):
     def aggregate(self, **kwargs):
         self.resulted_df[f"{self.var}-{self.agg_metric}"] = self.preprocess_df[self.var]
         return filter_df(self.resulted_df, **kwargs)
+
+
+AGGREGATOR_MAPPING = {
+    "month": MonthlyAggregator,
+    "dekad": DekadalAggregator,
+    "week": WeeklyAggregator,
+    "bimonth": BimonthlyAggregator,
+    "day": DailyAggregator,
+}
+
+
+class Validator:
+    """
+    A class for validating the input parameters for the climatology computation.
+
+    Methods:
+    --------
+
+    validate:
+        Validates the input parameters for the climatology computation.
+
+    """
+
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        variable: str,
+        fillna: bool = False,
+        fillna_window_size: int = None,
+        smoothing: bool = False,
+        smooth_window_size: int = None,
+        time_step: str = None,
+        metrics: List[str] = None,
+        time_span: List[str] = None,
+    ):
+        self.df = df
+        self.variable = variable
+        self.fillna = fillna
+        self.fillna_window_size = fillna_window_size
+        self.smoothing = smoothing
+        self.smooth_window_size = smooth_window_size
+        self.time_step = time_step
+        self.metrics = metrics
+        self.timespan = time_span
+
+    def validate(self):
+        self._validate_df_index()
+        self._validate_variable()
+        self._validate_fillna_smoothing()
+        self._validate_timespan(self.timespan)
+        self._validate_time_step(self.time_step)
+        self._validate_normal_metrics(self.metrics)
+
+    def _validate_df_index(self):
+        if not isinstance(self.df, pd.DataFrame):
+            raise TypeError("df must be a pandas DataFrame")
+        if not isinstance(self.df.index, pd.DatetimeIndex):
+            raise ValueError("df index must be a datetime index")
+
+    def _validate_variable(self):
+        if self.variable not in self.df.columns:
+            raise ValueError(
+                f"Variable '{self.variable}' not found in the input DataFrame columns."
+            )
+
+    def _validate_fillna_smoothing(self):
+        if any(
+            [
+                self.fillna and self.fillna_window_size is None,
+                self.smoothing and self.smooth_window_size is None,
+            ]
+        ):
+            raise ValueError(
+                "window size must be provided when 'fillna' or 'smoothing' is enabled"
+            )
+
+    def _validate_timespan(self, timespan):
+        if timespan and len(timespan) != 2:
+            raise ValueError(
+                "timespan must be a list containing two dates: ['start_date', 'end_date']"
+            )
+
+    def _validate_time_step(self, time_step):
+        valid_time_steps = ["month", "dekad", "week", "day", "bimonth"]
+        if time_step not in valid_time_steps:
+            raise ValueError(
+                f"Invalid time step '{time_step}'. Supported values: {valid_time_steps}"
+            )
+
+    def _validate_normal_metrics(self, metrics):
+        valid_metrics = ["mean", "median", "min", "max", "std"]
+        for metric in metrics:
+            if metric not in valid_metrics:
+                raise ValueError(
+                    f"Invalid metric '{metric}'. Supported values: {valid_metrics}"
+                )
 
 
 class Climatology:
@@ -329,6 +408,19 @@ class Climatology:
         """
         Initializes the Climatology class.
         """
+        self.validator = Validator(
+            df,
+            variable,
+            fillna,
+            fillna_window_size,
+            smoothing,
+            smooth_window_size,
+            time_step,
+            normal_metrics,
+            timespan,
+        )
+
+        self.validator.validate()
         self.df = df
         self.var = variable
         self.fillna = fillna
@@ -340,56 +432,9 @@ class Climatology:
         self.normal_metrics = normal_metrics
         self.agg_metric = agg_metric
         self.clim_df = pd.DataFrame()
-        # self.aggregator = self._get_aggregator()
-        self.valid_time_steps = ["month", "dekad", "week", "day", "bimonth"]
-        self.valid_metrics = ["mean", "median", "min", "max", "std"]
-        self.aggregated_df = self._get_aggregator()
+        self.aggregated_df = self._perform_aggregation()
 
-    def _validate_time_step(
-        self,
-    ) -> None:
-        """
-        Validates the time step.
-
-        Raises:
-        -------
-        ValueError:
-            If the time step is not one of the supported values.
-
-        """
-        if self.time_step not in self.valid_time_steps:
-            raise ValueError(
-                f"Invalid time step '{self.time_step}'. Supported values: {self.valid_time_steps}."
-            )
-
-    def _validate_metrics(self):
-        """
-        Validates the metrics to be used in the climatology computation.
-
-        Raises:
-        -------
-            ValueError: If the metric is not one of the supported values.
-
-        """
-        for metric in self.normal_metrics:
-            if metric not in self.valid_metrics:
-                raise ValueError(
-                    f"Invalid metric '{metric}'. Supported values: {self.valid_metrics}."
-                )
-
-    def _validate_input(self):
-        self._validate_time_step()
-        self._validate_metrics()
-
-    def _get_aggregator(self):
-
-        AGGREGATOR_MAPPING = {
-            "month": MonthlyAggregator,
-            "dekad": DekadalAggregator,
-            "week": WeeklyAggregator,
-            "bimonth": BimonthlyAggregator,
-            "day": DailyAggregator,
-        }
+    def _perform_aggregation(self):
 
         params = {
             "df": self.df,
@@ -402,12 +447,7 @@ class Climatology:
             "agg_metric": self.agg_metric,
         }
         aggregator_class = AGGREGATOR_MAPPING.get(self.time_step)
-        if aggregator_class:
-            return aggregator_class(**params).aggregate()
-        else:
-            raise ValueError(
-                f"Invalid time step '{self.time_step}'. Supported values: {', '.join(AGGREGATOR_MAPPING.keys())}"
-            )
+        return aggregator_class(**params).aggregate()
 
     def compute_normals(self, **kwargs) -> pd.DataFrame:
         """
@@ -433,73 +473,30 @@ class Climatology:
 
         return filter_df(self.clim_df, **kwargs)
 
-    def plot_ts(
-        self,
-        df=None,
-        x_axis=None,
-        colmns_kwargs=None,
-        plot_raw=False,
-        raw_resample="D",
-        raw_kwargs=None,
-        plot_style="ggplot",
-        **kwargs,
-    ):
-        """
-        Plot the time series data for the provided dataframe.
 
-        parameters:
-        -----------
+if __name__ == "__main__":
+    ascat_ds = "/home/m294/ascat_dataset"
+    from smadi.data_reader import extract_obs_ts
 
-        df: pd.DataFrame
-            The dataframe containing the data to plot. or None if the climatology object is used.
+    # sample point in Germany
 
-        x_axis: list
-            The x-axis values for the plot. or None if the climatology object is used.
+    lat = 51.0
+    lon = 10.0
+    raw_df = extract_obs_ts((lon, lat), ascat_ds, obs_type="sm")
+    clim = Climatology(
+        raw_df,
+        "sm",
+        fillna=True,
+        fillna_window_size=7,
+        smoothing=True,
+        smooth_window_size=7,
+        time_step="month",
+        normal_metrics=["mean", "std"],
+        agg_metric="mean",
+    )
+    df = clim.compute_normals()
+    from smadi.preprocess import validate_distribution
 
-        colmns_kwargs: dict
-            The dictionary containing the column names and their respective matplotlib plot options.
-
-        plot_raw: bool
-            Whether to plot the raw data on the plot as background.
-
-        raw_resample: str
-            The resample frequency for the raw data. Supported values: 'D', 'W', 'M', etc.
-
-        raw_kwargs: dict
-            The dictionary containing the matplotlib plot options for the raw data.
-
-        kwargs: dict
-            The keyword arguments for the matplotlib plot for the figure such as title, xlabel, ylabel, legend, figsize, and grid.
-
-        """
-        # Set values for kwargs based on provided values
-        plt.style.use(plot_style)
-        df = self.compute_normals() if df is None else df
-        x_axis = df.index if x_axis is None else x_axis
-        colmns_kwargs = (
-            {
-                f"{self.var}-{self.agg_metric}": {
-                    "label": f"{self.var}-{self.agg_metric}"
-                }
-            }
-            if colmns_kwargs is None
-            else colmns_kwargs
-        )
-        plot_params = get_plot_options(**kwargs)
-        if plot_params["figsize"] is not None:
-            plt.figure(figsize=plot_params["figsize"])
-
-        if plot_raw:
-            raw_df = (
-                self.original_df.resample(raw_resample).mean()
-                if raw_resample
-                else self.original_df
-            )
-            plt.plot(
-                raw_df.index,
-                raw_df[f"{self.var}"],
-                **raw_kwargs if raw_kwargs else {"alpha": 0.5, "label": "Raw Data"},
-            )
-
-        plot_colmns(df, x_axis, colmns_kwargs)
-        plot_figure(plot_params)
+    l = df["sm-mean"].values.tolist()
+    print(l)
+    validate_distribution(l)

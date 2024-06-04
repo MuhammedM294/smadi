@@ -204,6 +204,63 @@ def plot_categories_count(x_axis, results, anomaly_method):
             )
 
 
+def plot_ts(
+    df,
+    x_axis,
+    colmns_kwargs,
+    plot_raw=False,
+    raw_df=None,
+    raw_var=None,
+    raw_kwargs=None,
+    **kwargs,
+):
+    """
+    Plot the time series data for the provided dataframe.
+
+    parameters:
+    -----------
+
+    df: pd.DataFrame
+        The dataframe containing the data to plot.
+
+    x_axis: list
+        The x-axis values for the plot.
+
+    colmns_kwargs: dict
+        The dictionary containing the column names and their respective matplotlib plot options.
+
+    plot_raw: bool
+        Whether to plot the raw data on the plot as background.
+
+    raw_df: pd.DataFrame
+        The dataframe containing the raw data to plot.
+
+    raw_var: str
+        The name of the raw variable to plot.
+
+    raw_kwargs: dict
+        The dictionary containing the matplotlib plot options for the raw data.
+
+    kwargs: dict
+        The keyword arguments for the matplotlib plot for the figure such as title, xlabel, ylabel, legend, figsize, and grid.
+
+    """
+    # Set values for kwargs based on provided values
+    plot_params = get_plot_options(**kwargs)
+    if plot_params["figsize"] is not None:
+        plt.figure(figsize=plot_params["figsize"])
+
+    if plot_raw:
+        plt.plot(
+            raw_df.index,
+            raw_df[raw_var],
+            **raw_kwargs if raw_kwargs else {},
+        )
+
+    plot_colmns(df, x_axis, colmns_kwargs)
+    plot_figure(plot_params)
+
+
 def plot_anomaly(
     df, x_axis, colmns, thresholds, plot_hbars=True, plot_categories=True, **kwargs
 ):
@@ -250,58 +307,55 @@ def plot_anomaly(
     plot_figure(plot_params)
 
 
-def plot_ts(
-    df,
-    x_axis,
-    colmns_kwargs,
-    plot_raw=False,
-    clim_obj=None,
-    raw_var=None,
-    raw_kwargs=None,
-    **kwargs,
-):
+def plot_fill_bet(df=None, x_axis=None, colmn=None, plot_style="ggplot", **kwargs):
     """
-    Plot the time series data for the provided dataframe.
+    Plot the computed anomalies using the fill_between method.
 
     parameters:
     -----------
 
     df: pd.DataFrame
-        The dataframe containing the data to plot.
+        The dataframe containing the data to plot. if None, the computed anomalies will be used.
 
     x_axis: list
-        The x-axis values for the plot.
+        The x-axis values for the plot. if None, the index of the dataframe will be used.
 
-    colmns_kwargs: dict
-        The dictionary containing the column names and their respective matplotlib plot options.
+    colmn: str
+        The column name to plot.
 
-    plot_raw: bool
-        Whether to plot the raw data on the plot as background.
-
-    clim_obj: Climatology
-        The climatology object containing the original data.
-
-    raw_var: str
-        The name of the raw variable to plot.
-
-    raw_kwargs: dict
-        The dictionary containing the matplotlib plot options for the raw data.
+    plot_style: str
+        The plot style to use for the plot.
 
     kwargs: dict
-        The keyword arguments for the matplotlib plot for the figure such as title, xlabel, ylabel, legend, figsize, and grid.
+        Additional parameters to be used for customizing the plot. It can be any of the following:
+
+        ['title', 'xlabel', 'ylabel', 'legend', 'figsize', 'grid']
 
     """
-    # Set values for kwargs based on provided values
+
+    plt.style.use(plot_style)
     plot_params = get_plot_options(**kwargs)
-    if plot_params["figsize"] is not None:
-        plt.figure(figsize=plot_params["figsize"])
+    plt.figure(figsize=plot_params["figsize"])
 
-    if plot_raw:
-        plt.plot(
-            clim_obj.original_df.index,
-            clim_obj.original_df[raw_var],
-            **raw_kwargs if raw_kwargs else {},
-        )
+    plt.fill_between(
+        x_axis,
+        df[colmn],
+        where=df[colmn].values >= 0,
+        color="blue",
+        label="Wet",
+    )
 
-    plot_colmns(df, x_axis, colmns_kwargs)
+    plt.fill_between(
+        x_axis,
+        df[colmn],
+        where=df[colmn].values < 0,
+        color="red",
+        label="Dry",
+    )
+
+    # Add horizontal line at y=0
+    plt.axhline(y=0, color="black", linestyle="--", linewidth=1)
+
+    plt.legend(loc="upper right", fontsize=10)
+
     plot_figure(plot_params)
