@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.stats import gaussian_kde
 from scipy.stats import norm, beta, gamma
-from scipy.stats import percentileofscore
 from standard_precip.spi import SPI
 
 

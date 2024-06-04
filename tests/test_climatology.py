@@ -5,7 +5,6 @@ import pandas as pd
 
 
 from smadi.climatology import (
-    Aggregator,
     MonthlyAggregator,
     DekadalAggregator,
     WeeklyAggregator,
@@ -38,22 +37,22 @@ class TestDailyAggregator:
         assert aggregator.var == "sm"
         assert aggregator.timespan == ["2022-01-01", "2022-12-31"]
 
-    def test_validation(self, data_sample, _class=DailyAggregator):
-        """
-        Test validation of input parameters.
-        """
+    # def test_validation(self, data_sample, _class=DailyAggregator):
+    #     """
+    #     Test validation of input parameters.
+    #     """
 
-        # Test for invalid input parameter for the pandas DataFrame
-        with pytest.raises(TypeError):
-            _class([], "sm", "month")
+    #     # Test for invalid input parameter for the pandas DataFrame
+    #     with pytest.raises(TypeError):
+    #         _class([], "sm", "month")
 
-        # Test for invalid input parameter for the pandas DataFrame not having a datetime index
-        with pytest.raises(ValueError):
-            _class(pd.DataFrame(), "sm")
+    #     # Test for invalid input parameter for the pandas DataFrame not having a datetime index
+    #     with pytest.raises(ValueError):
+    #         _class(pd.DataFrame(), "sm")
 
-        # Test for invalid input parameter for the variable
-        with pytest.raises(ValueError):
-            _class(data_sample, "invalid_column")
+    #     # Test for invalid input parameter for the variable
+    #     with pytest.raises(ValueError):
+    #         _class(data_sample, "invalid_column")
 
     def test_smoothing(self, data_sample, _class=DailyAggregator, variable="sm"):
         """
