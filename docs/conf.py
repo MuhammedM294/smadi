@@ -76,10 +76,6 @@ extensions = [
     "sphinx.ext.napoleon",
 ]
 
-# nbsphinx specific settings
-nbsphinx_execute = "always"  # Run notebooks when building
-nbsphinx_kernel_name = "python3"  # Kernel name for Jupyter
-
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
