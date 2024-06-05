@@ -62,6 +62,8 @@ except Exception as e:
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
+    "nbsphinx",
+    "nbsphinx_link",
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
@@ -74,8 +76,14 @@ extensions = [
     "sphinx.ext.napoleon",
 ]
 
+# nbsphinx specific settings
+nbsphinx_execute = "always"  # Run notebooks when building
+nbsphinx_kernel_name = "python3"  # Kernel name for Jupyter
+
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
+exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
 # The suffix of source filenames.
 source_suffix = ".rst"
