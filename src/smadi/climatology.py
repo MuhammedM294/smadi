@@ -432,7 +432,10 @@ class Climatology:
         self.normal_metrics = normal_metrics
         self.agg_metric = agg_metric
         self.clim_df = pd.DataFrame()
-        self.aggregated_df = self._perform_aggregation()
+
+    @property
+    def aggregated_df(self):
+        return self._perform_aggregation()
 
     def _perform_aggregation(self):
 
@@ -495,8 +498,6 @@ if __name__ == "__main__":
         agg_metric="mean",
     )
     df = clim.compute_normals()
-    from smadi.preprocess import validate_distribution
-
-    l = df["sm-mean"].values.tolist()
-    print(l)
-    validate_distribution(l)
+    print(df.head())
+    clim.time_step = "week"
+    print(clim.compute_normals().head())

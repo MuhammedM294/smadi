@@ -321,7 +321,6 @@ def compute_clim(
         The DataFrame containing the climatology data.
 
     """
-
     for metric in metrics:
 
         df["norm-" + metric] = df.groupby(clim_groupping(df, time_step))[
