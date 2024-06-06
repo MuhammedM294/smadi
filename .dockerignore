@@ -1,0 +1,44 @@
+# Ignore Python bytecode
+__pycache__
+*.pyc
+*.pyo
+
+# Ignore virtual environments
+env
+.env
+
+# Ignore build artifacts
+build
+dist
+*.egg-info
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore logs
+*.log
+
+# Ignore test results
+.coverage
+.pytest_cache
+
+# Ignore Docker-specific and deployment files
+docker_compose.yml
+Dockerfile
+.dockerignore
+
+# Ignore documentation files
+docs
+.readthedocs.yml
+
+# Ignore version control system files
+.git
+.gitignore
+.gitattributes
+
+# Ignore tox environments
+.tox
+
+# Include everything else
+!.dockerignore
