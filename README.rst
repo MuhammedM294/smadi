@@ -353,6 +353,30 @@ For virtualenv:
     pip install -r requirements.txt
 
 
+Docker Usage
+------------
+
+To use the Docker image for SMADI, follow these steps:
+
+1. **Pull the Docker Image:**
+
+   Open your terminal and run the following command to pull the Docker image from Docker Hub:
+
+   .. code-block:: bash
+
+      docker pull muhammedabdelaal/smadi:latest
+
+2. **Run the Docker Image:**
+
+   After pulling the image, you can run it with the following command:
+
+   .. code-block:: bash
+
+      docker run -it muhammedabdelaal/smadi:latest
+
+   This will start a container with the SMADI application.
+
+
 
 .. _pyscaffold-notes:
 
