@@ -8,7 +8,7 @@ The implemented methods include:
 2. SMAPI (Soil Moisture Anomaly Percent Index): Measures anomalies as a percentage deviation from the climatological mean or median.
 3. SMDI (Soil Moisture Deficit Index): Quantifies soil moisture deficit based on deviations from climatological median and extremes.
 4. ESSMI (Empirical Standardized Soil Moisture Index): Uses a nonparametric empirical probability density function for standardizing soil moisture values.
-5. SMAD (Standardized Median Absolute Deviation): Calculates anomalies using the median and interquartile range, providing robustness to outliers.
+5. SMAD (Standardized Anomaly Absolute Deviation): Calculates anomalies using the median and interquartile range, providing robustness to outliers.
 6. SMDS (Soil Moisture Drought Severity): Assesses drought severity based on percentile rankings of soil moisture values.
 7. SMCI (Soil Moisture Condition Index): Measures soil moisture content relative to climatological minima and maxima.
 8. SMCA (Soil Moisture Content Anomaly): Quantifies anomalies as a deviation from climatological mean or median relative to maxima.
@@ -175,7 +175,7 @@ class ZScore(AnomalyDetector):
 
 class SMAD(AnomalyDetector):
     """
-    A class for detecting anomalies in time series data based on the Standardized Median Absolute Deviation(SMAD) method.
+    A class for detecting anomalies in time series data based on the Standardized Anomaly Absolute Deviation(SMAD) method.
 
     SMAD = (x - η) / IQR
 
