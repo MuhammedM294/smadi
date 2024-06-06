@@ -131,7 +131,7 @@ where:
 The kernel density estimator and the inverse of the standard normal distribution function can be implemented using the `scipy.stats` module in Python. The KDE can be computed using `scipy.stats.gaussian_kde`, and the inverse standard normal distribution can be obtained using `scipy.stats.norm.ppf`.
 
 SMDS: Soil Moisture Drought Severity
------------------------------------
+------------------------------------
 
 The SMDS is calculated using the formula:
 
@@ -172,8 +172,6 @@ where:
 
 SMCA: Soil Moisture Content Anomaly
 -----------------------------------
-
-A method for detecting anomalies in time series data based on the Soil Moisture Content Anomaly (SMCA) method.
 
 The SMCA is calculated using the formula:
 
