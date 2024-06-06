@@ -46,6 +46,10 @@ Features
 Case Studies
 ============
 
+.. image:: https://github.com/MuhammedM294/SMADI_Tutorial/blob/bebd24e969ba58517b7afe2be576f9012dff9828/romania2007.png>
+      :alt: Romania ASCAT SSM Anomaly Maps of the 2007 Drought Event
+      :align: center
+
 
 The climatology is computed using a moving average window and averaging through multiple years with various time scales: monthly, bimonthly, decadal, and weekly. Anomalies are then detected using one or more of the following indices:
 
