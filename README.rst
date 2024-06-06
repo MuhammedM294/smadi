@@ -24,9 +24,12 @@ SMADI
 
     Soil Moisture Anomaly Detection Indicators
 
+This repository contributes to a visiting research activity within the framework of `EUMETSAT HSAF<https://hsaf.meteoam.it/>`_, hosted by `TU Wien <https://www.tuwien.at/mg/geo>`_, on the subject "development of workflows for climate normal and anomaly calculation for satellite soil moisture products".
+
 SMADI is a comprehensive workflow designed to compute climate normals and detect anomalies in satellite soil moisture data. The primary focus is on `ASCAT <https://hsaf.meteoam.it/Products/ProductsList?type=soil_moisture>`_ surface soil moisture (SSM) products. By establishing the distribution of SSM for each period and location, SMADI computes climatology, or climate normals, and subsequently identifies anomalies.
 
 The core objective of SMADI is to leverage these anomaly indicators to identify and highlight extreme events such as droughts and floods, providing valuable insights for environmental monitoring and management. Furthermore, the methods used apply to other meteorological variables, such as precipitation, temperature, and more.
+
 
 
 
