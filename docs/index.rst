@@ -30,7 +30,6 @@ Contents
    :maxdepth: 2
 
    Overview <readme>
-   Introduction <introduction>
    Installation <examples/installation>
    Loading Data <examples/loading_data>
    Compute Climatology <examples/compute_climatology>
