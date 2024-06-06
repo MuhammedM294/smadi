@@ -1,6 +1,12 @@
-The MIT License (MIT)
 
-Copyright (c) 2024 MuhammedM294
+Copyright (c) 2024 EUMETSAT
+
+All software, algorithms, data, products, and related documentation generated in 
+the context of this repository, together with all related intellectual property 
+rights, shall be owned by EUMETSAT. EUMETSAT's ownership of the data and products
+will be given adequate credit in any publication and website by displaying the words
+"@EUMETSAT" under each of these data products shown in a publication or website.
+
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
