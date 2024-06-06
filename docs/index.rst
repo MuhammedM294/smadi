@@ -30,6 +30,13 @@ Contents
    :maxdepth: 2
 
    Overview <readme>
+   Introduction <introduction>
+   Installation <examples/installation>
+   Loading Data <examples/loading_data>
+   Compute Climatology <examples/compute_climatology>
+   Plot Climatology <examples/plot_climatology>
+   Detect Anomalies <examples/detect_the_anomalies>
+   Run Workflow <examples/workflow>
    Contributions & Help <contributing>
    License <license>
    Authors <authors>
