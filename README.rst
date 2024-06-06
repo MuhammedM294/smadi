@@ -43,6 +43,10 @@ Features
 
 
 
+Case Studies
+============
+
+
 The climatology is computed using a moving average window and averaging through multiple years with various time scales: monthly, bimonthly, decadal, and weekly. Anomalies are then detected using one or more of the following indices:
 
 Z-score: The Standardized Z-score
