@@ -56,21 +56,27 @@ Romania Drought Event 2007
 
 Senegal Drought Event 2014
 --------------------------
+
 .. image:: https://github.com/MuhammedM294/SMADI_Tutorial/blob/bebd24e969ba58517b7afe2be576f9012dff9828/senegal2014.png
    :alt: Senegal ASCAT SSM Anomaly Maps of the 2014 Drought Event
    :align: center
 
+
 Germany Flood Event 2021
---------------------------
+------------------------
+
 .. image:: https://github.com/MuhammedM294/SMADI_Tutorial/blob/bebd24e969ba58517b7afe2be576f9012dff9828/germany2022.png
    :alt: Germany ASCAT SSM Anomaly Maps of the 2021 Flood Event
    :align: center
 
+
 Nigeria Flood Event 2022
---------------------------
+------------------------
+
 .. image:: https://github.com/MuhammedM294/SMADI_Tutorial/blob/bebd24e969ba58517b7afe2be576f9012dff9828/nigeria2021.png
    :alt: Nigeria ASCAT SSM Anomaly Maps of the 2022 Flood Event
    :align: center
+
 
 
 Anomaly Indicators
