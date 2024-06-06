@@ -31,6 +31,16 @@ SMADI is a comprehensive workflow designed to compute climate normals and detect
 The core objective of SMADI is to leverage these anomaly indicators to identify and highlight extreme events such as droughts and floods, providing valuable insights for environmental monitoring and management. Furthermore, the methods used apply to other meteorological variables, such as precipitation, temperature, and more.
 
 
+Features
+========
+
+
+-        **Data Reading**:  Read and preprocess the input data from Supported data sources. :mod:`smadi.data_reader`
+-        **Climatology**: Compute the climatology for the input data based different time steps (e.g., monthly, dekadly, weekly, etc.). :mod:`smadi.climatology`
+-        **Anomaly Detection**: Detect anomalies based on the computed climatology using different anomaly detection indices. :mod:`smadi.anomaly_detectors`
+-        **Visualization**: Visualize the computed climatology and anomalies as time series, maps, and histograms. :mod:`smadi.plot , smadi.map`
+
+
 
 
 The climatology is computed using a moving average window and averaging through multiple years with various time scales: monthly, bimonthly, decadal, and weekly. Anomalies are then detected using one or more of the following indices:
