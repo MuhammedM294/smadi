@@ -2,21 +2,20 @@
    please update the URLs accordingly
 
 .. image:: https://readthedocs.org/projects/smadi/badge/?version=latest
-    :alt: ReadTheDocs
-    :target: https://smadi.readthedocs.io/en/latest/readme.html
+   :alt: ReadTheDocs
+   :target: https://smadi.readthedocs.io/en/latest/readme.html
 
 .. image:: https://img.shields.io/pypi/v/smadi.svg
-    :alt: PyPI-Server
-    :target: https://pypi.org/project/smadi/
+   :alt: PyPI-Server
+   :target: https://pypi.org/project/smadi/
 
 .. image:: https://mybinder.org/badge_logo.svg
-    :alt: Binder
-    :target: https://mybinder.org/v2/gh/MuhammedM294/SMADI_Tutorial/main?labpath=Tutorial.ipynb
+   :alt: Binder
+   :target: https://mybinder.org/v2/gh/MuhammedM294/SMADI_Tutorial/main?labpath=Tutorial.ipynb
 
 .. image:: https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold
-    :alt: Project generated with PyScaffold
-    :target: https://pyscaffold.org/
-
+   :alt: Project generated with PyScaffold
+   :target: https://pyscaffold.org/
 
 =====
 SMADI
@@ -36,10 +35,9 @@ Features
 
 
 -        **Data Reading**:  Read and preprocess the input data from Supported data sources. :mod:`smadi.data_reader`
--        **Climatology**: Compute the climatology for the input data based different time steps (e.g., monthly, dekadly, weekly, etc.). :mod:`smadi.climatology`
+-        **Climatology**: Compute the climatology for the input data based on different time steps (e.g., monthly, dekadal, weekly, etc.). :mod:`smadi.climatology`
 -        **Anomaly Detection**: Detect anomalies based on the computed climatology using different anomaly detection indices. :mod:`smadi.anomaly_detectors`
 -        **Visualization**: Visualize the computed climatology and anomalies as time series, maps, and histograms. :mod:`smadi.plot , smadi.map`
-
 
 
 
