@@ -393,3 +393,20 @@ class AnomalyDetectorFactory:
         if method not in AnomalyDetectorFactory.methods:
             raise ValueError(f"Unknown method: {method}")
         return AnomalyDetectorFactory.methods[method](**kwargs)
+
+
+# Supported anomaly detection methods
+_Detectors = {
+    "zscore": ZScore,
+    "smapi-mean": SMAPI,
+    "smapi-median": SMAPI,
+    "smdi": SMDI,
+    "smca-mean": SMCA,
+    "smca-median": SMCA,
+    "smad": SMAD,
+    "smci": SMCI,
+    "smds": SMDS,
+    "essmi": ESSMI,
+    "beta": ParaDis,
+    "gamma": ParaDis,
+}

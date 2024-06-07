@@ -1,6 +1,6 @@
 import warnings
 
-from typing import Union, List
+from typing import Union, List, Dict
 import pandas as pd
 
 
@@ -328,3 +328,85 @@ def compute_clim(
         ].transform(metric)
 
     return df
+
+
+def validate_date_params(
+    time_step: str,
+    year: Union[int, List[int]] = None,
+    month: Union[int, List[int]] = None,
+    dekad: Union[int, List[int]] = None,
+    week: Union[int, List[int]] = None,
+    bimonth: Union[int, List[int]] = None,
+    day: Union[int, List[int]] = None,
+) -> Dict[str, List[int]]:
+    """
+    Validate the date parameters for the anomaly detection workflow.
+    """
+
+    params = {
+        "year": year,
+        "month": month,
+        "dekad": dekad,
+        "week": week,
+        "bimonth": bimonth,
+        "day": day,
+    }
+    params = {
+        k: [v] if isinstance(v, int) else v for k, v in params.items() if v is not None
+    }
+
+    required_params = {
+        "month": ["year", "month"],
+        "dekad": ["year", "month", "dekad"],
+        "week": ["year", "week"],
+        "bimonth": ["year", "month", "bimonth"],
+        "day": ["year", "month", "day"],
+    }
+    if time_step not in required_params:
+        raise ValueError(
+            f"Unsupported time_step: {time_step}. Supported time_steps are {', '.join(required_params.keys())}"
+        )
+
+    date_param = {k: params[k] for k in required_params[time_step] if k in params}
+    if time_step == "week":
+        date_param.pop("month", None)
+
+    # Validation for parameters
+    for param_name, param_value in date_param.items():
+        if param_value is None:
+            raise ValueError(f"The '{param_name}' parameter must be provided")
+        if not (isinstance(param_value, (list, int))):
+            raise ValueError(
+                f"The '{param_name}' parameter must be an int of list of ints"
+            )
+    lengths = {len(v) for v in date_param.values()}
+    if len(lengths) > 1:
+        raise ValueError(
+            "The length of the date parameters lists must be the same for multiple dates"
+        )
+
+    # Checking if required parameters are provided
+    local_vars = locals()
+    missing_params = [
+        param for param in required_params[time_step] if local_vars.get(param) is None
+    ]
+    if missing_params:
+        raise ValueError(
+            f"For time_step '{time_step}', the following parameters must be provided: "
+            f"{', '.join(missing_params)}"
+        )
+
+    return date_param
+
+
+def validate_anomaly_method(methods, _Detectors):
+    """
+    Validate the names of the anomaly detection methods.
+    """
+
+    for method in methods:
+        if method not in _Detectors.keys():
+            raise ValueError(
+                f"Anomaly method '{method}' is not supported."
+                f"Supported methods are one of the following: {tuple(_Detectors.keys())}"
+            )

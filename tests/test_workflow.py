@@ -1,13 +1,14 @@
 import pytest
 
-from smadi.workflow import validate_anomaly_method, validate_date_params, _Detectors
+from smadi.preprocess import validate_anomaly_method, validate_date_params
+from smadi.anomaly_detectors import _Detectors
 
 
 def test_validate_anomaly_method_valid_methods():
     # Test with valid methods
     valid_methods = list(_Detectors.keys())
     try:
-        validate_anomaly_method(valid_methods)
+        validate_anomaly_method(valid_methods, _Detectors)
     except ValueError:
         pytest.fail("validate_anomaly_method raised ValueError unexpectedly!")
 
@@ -16,7 +17,7 @@ def test_validate_anomaly_method_invalid_method():
     # Test with an invalid method
     invalid_methods = ["invalid_method"]
     with pytest.raises(ValueError) as exc_info:
-        validate_anomaly_method(invalid_methods)
+        validate_anomaly_method(invalid_methods, _Detectors)
     assert "Anomaly method 'invalid_method' is not supported." in str(exc_info.value)
 
 
@@ -24,7 +25,7 @@ def test_validate_anomaly_method_partial_invalid_methods():
     # Test with a mix of valid and invalid methods
     mixed_methods = ["zscore", "invalid_method"]
     with pytest.raises(ValueError) as exc_info:
-        validate_anomaly_method(mixed_methods)
+        validate_anomaly_method(mixed_methods, _Detectors)
     assert "Anomaly method 'invalid_method' is not supported." in str(exc_info.value)
 
 
@@ -32,7 +33,7 @@ def test_validate_anomaly_method_empty_list():
     # Test with an empty list
     empty_methods = []
     try:
-        validate_anomaly_method(empty_methods)
+        validate_anomaly_method(empty_methods, _Detectors)
     except ValueError:
         pytest.fail("validate_anomaly_method raised ValueError unexpectedly!")
 
