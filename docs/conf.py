@@ -75,6 +75,8 @@ extensions = [
     "nbsphinx",
 ]
 
+mathjax_path = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
