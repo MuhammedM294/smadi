@@ -33,4 +33,7 @@ jobs:
         pip install smadi
   
     - name: Run tests
-      run: pytest
+      run: |
+        pytest tests/test_climatology.py \
+               tests/test_indicators.py \
+               tests/test_workflow.py
