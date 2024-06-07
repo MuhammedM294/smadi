@@ -1,6 +1,9 @@
 .. These are examples of badges you might want to add to your README:
    please update the URLs accordingly
 
+.. image:: https://github.com/TUW-GEO/pytesmo/workflows/Automated%20Tests/badge.svg?branch=master
+   :target: https://github.com/MuhammedM294/smadi/actions
+
 .. image:: https://readthedocs.org/projects/smadi/badge/?version=latest
    :alt: ReadTheDocs
    :target: https://smadi.readthedocs.io/en/latest/README.html
