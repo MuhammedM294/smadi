@@ -23,7 +23,7 @@ SMADI
 
     Soil Moisture Anomaly Detection Indicators
 
-This repository contributes to a visiting research activity within the framework of `EUMETSAT HSAF<https://hsaf.meteoam.it/>`_, hosted by `TU Wien <https://www.tuwien.at/mg/geo>`_, on the subject "development of workflows for climate normal and anomaly calculation for satellite soil moisture products".
+This repository contributes to a visiting research activity within the framework of `EUMETSAT HSAF <https://hsaf.meteoam.it/>`_, hosted by `TU Wien <https://www.tuwien.at/mg/geo>`_, on the subject "development of workflows for climate normal and anomaly calculation for satellite soil moisture products".
 
 SMADI is a comprehensive workflow designed to compute climate normals and detect anomalies in satellite soil moisture data. The primary focus is on `ASCAT <https://hsaf.meteoam.it/Products/ProductsList?type=soil_moisture>`_ surface soil moisture (SSM) products. By establishing the distribution of SSM for each period and location, SMADI computes climatology, or climate normals, and subsequently identifies anomalies.
 
@@ -34,9 +34,12 @@ Features
 ========
 
 
--        **Data Reading**:  Read and preprocess the input data from Supported data sources. :mod:`smadi.data_reader`
+-         **Data Reading**:  Read and preprocess the input data from Supported data sources. :mod:`smadi.data_reader` 
+
 -        **Climatology**: Compute the climatology for the input data based on different time steps (e.g., monthly, dekadal, weekly, etc.). :mod:`smadi.climatology`
+
 -        **Anomaly Detection**: Detect anomalies based on the computed climatology using different anomaly detection indices. :mod:`smadi.anomaly_detectors`
+
 -        **Visualization**: Visualize the computed climatology and anomalies as time series, maps, and histograms. :mod:`smadi.plot , smadi.map`
 
 
