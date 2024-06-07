@@ -2,7 +2,7 @@
 SMADI
 =====
 
-This is the documentation of **smadi**.
+This is the documentation of **SMADI**.
 
 .. note::
 
