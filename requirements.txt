@@ -1,3 +1,4 @@
+build-essential
 pyscaffold
 autopep8
 numpy
