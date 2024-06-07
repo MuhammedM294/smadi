@@ -1,4 +1,8 @@
 pyscaffold
+libgeos-dev
+libproj-dev
+libjpeg-dev
+geos
 autopep8
 numpy
 scipy
