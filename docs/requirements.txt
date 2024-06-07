@@ -6,4 +6,9 @@ sphinx_rtd_theme
 sphinx
 nbsphinx
 nbsphinx-link
-sphinx_rtd_theme
+pygments 
+ipython
+sphinxcontrib-bibtex
+sphinxcontrib-napoleon
+sphinxcontrib-mermaid
+sphinxcontrib-plantuml

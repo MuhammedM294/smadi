@@ -1,5 +1,5 @@
 =====
-smadi
+SMADI
 =====
 
 This is the documentation of **smadi**.
@@ -29,7 +29,9 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   Overview <readme>
+   Overview <README>
+   Anomalies Indicators <indicators>
+   Installation <examples/installation>
    Loading Data <examples/loading_data>
    Compute Climatology <examples/compute_climatology>
    Plot Climatology <examples/plot_climatology>
