@@ -15,7 +15,7 @@ if __name__ == "__main__":
             version="1.0.1",
             entry_points={
                 "console_scripts": [
-                    "run_smadi = smadi.workflow:main",
+                    "smadi_run = smadi.workflow:main",
                 ]
             },
         )
