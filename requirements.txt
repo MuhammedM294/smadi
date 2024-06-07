@@ -31,3 +31,4 @@ PySide2
 mapclassify
 standard-precip
 tqdm
+pytest
