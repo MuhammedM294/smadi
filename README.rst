@@ -37,13 +37,13 @@ Features
 ========
 
 
--         **Data Reading**:  Read and preprocess the input data from Supported data sources. :mod:`smadi.data_reader` 
+-        **Data Reading**:  Read and preprocess the input data from Supported data sources. 
 
--        **Climatology**: Compute the climatology for the input data based on different time steps (e.g., monthly, dekadal, weekly, etc.). :mod:`smadi.climatology`
+-        **Climatology**: Compute the climatology for the input data based on different time steps (e.g., monthly, dekadal, weekly, etc.). 
 
--        **Anomaly Detection**: Detect anomalies based on the computed climatology using different anomaly detection indices. :mod:`smadi.anomaly_detectors`
+-        **Anomaly Detection**: Detect anomalies based on the computed climatology using different anomaly detection indices. 
 
--        **Visualization**: Visualize the computed climatology and anomalies as time series, maps, and histograms. :mod:`smadi.plot , smadi.map`
+-        **Visualization**: Visualize the computed climatology and anomalies as time series, maps, and histograms. 
 
 
 
